@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Media;
+using System.IO;
 
 namespace DungeonExplorer
 {
@@ -7,12 +8,18 @@ namespace DungeonExplorer
     {
         private Player player;
         private Room currentRoom;
-
+        public string workingDir { get; set; }
+        public string curDir { get; set; }
+        public string artDir { get; set; }
         public Game()
         {
-            // Initialize the game with one room and one player
-            
+            // Initialise directy variables
+            workingDir = Environment.CurrentDirectory;
+            curDir = Directory.GetParent(workingDir).Parent.FullName;
+            artDir = curDir + "\\art\\";
 
+            // Initialize the game with one room and one player
+            player = new Player("Barts", 100);
         }
         public void Start()
         {
@@ -25,16 +32,29 @@ namespace DungeonExplorer
             GameIntroduction();
         }
 
+        private string GetText(string file)
+        {
+            string path = artDir + file + ".txt";
+            if (File.Exists(path))
+            {
+                return File.ReadAllText(path);
+            }
+            else
+            {
+                return "File does not exist...";
+            }
+        }
+
         private void GameIntroduction()
         {
-            Console.WriteLine(@"Welcome to ""...""");
+            Console.WriteLine(GetText("intro"));
             MainMenu();
         }
 
         private void MainMenu()
         {
-            Console.WriteLine(@"Settings menu: ""...""");
-            InitialiseGame();
+            Console.WriteLine(GetText("menu"));
+            //InitialiseGame();
         }
 
         private void InitialiseGame()

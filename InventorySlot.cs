@@ -6,20 +6,17 @@ using System.Threading.Tasks;
 
 namespace DungeonExplorer
 {
-    public class Item
+    public class InventorySlot
     {
-        public string name {  get; set; }
-        public int id {  get; set; }
-
-        public Item(string name, int id)
+        public ItemStack itemStack;
+        public InventorySlot()
         {
-            this.name = name;
-            this.id = id;
+            itemStack = new ItemStack();
         }
 
         public override string ToString()
         {
-            return name;
+            return itemStack.ToString();
         }
     }
 }

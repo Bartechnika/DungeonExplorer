@@ -1,0 +1,3 @@
+	Font size : max
+	Volume    : 100%
+	
