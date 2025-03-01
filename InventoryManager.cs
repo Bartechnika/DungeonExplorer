@@ -12,24 +12,23 @@ namespace DungeonExplorer
         public InventorySlot[,] inventory = new InventorySlot[3, 9];
 
         public InventoryManager()
-        {   
-            for (int i = 0; i < inventory.GetLength(0); i++) 
-            {   
-                for(int j = 0; j < inventory.GetLength(1); j++)
+        {
+            for (int i = 0; i < inventory.GetLength(0); i++)
+            {
+                for (int j = 0; j < inventory.GetLength(1); j++)
                 {
-                    inventory[i,j] = new InventorySlot();
+                    inventory[i, j] = new InventorySlot();
                 }
             }
         }
-
         public override string ToString()
         {
-            string contents = "";
+            var contents = new StringBuilder();
             foreach(var slot in inventory)
             {
-                contents += " " + slot.ToString();
+                contents.Append(slot.ToString() + " ");
             }
-            return contents;
+            return contents.ToString();
         }
     }
 }
