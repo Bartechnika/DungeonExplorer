@@ -4,6 +4,7 @@ using System.IO;
 using System.Collections.Generic;
 using System.Diagnostics.SymbolStore;
 using System.ComponentModel;
+using System.Threading;
 
 namespace DungeonExplorer
 {
@@ -37,20 +38,36 @@ namespace DungeonExplorer
                 throw new FileNotFoundException("File does not exist...");
             }
         }
-        private string ValidateInputSelection(string message, List<string> options)
+
+        // Display dialogue appearing from left to right with a time delay.
+        public static void WriteDialogue(string message, int wait = 1000)
         {
+            int charDelay = 35;
+            foreach(char c in message)
+            {   
+                System.Threading.Thread.Sleep(charDelay);
+                Console.Write(c);
+            }
+            Console.Write('\n');
+            System.Threading.Thread.Sleep(wait);
+        }
+
+        public static string ValidateInputSelection(string message, string[] options = null)
+        {   
+            // If the optional parameter "options" is not defined in the function call
+            // it is set by default to provide the player with a yes/no choice.
+            options = options ?? new string[] {"Y", "N"};
             string sel = null;
             bool validInput = false;
             while (!validInput)
             {
                 Console.Write(message);
                 sel = Console.ReadLine();
-                if (options.Contains(sel))
+                if (Array.IndexOf(options, sel) > -1)
                     validInput = true;
                 else
                     Console.WriteLine("User input not in range of selection! Please try again.\n");
             }
-
             return sel;
         }
 
@@ -75,7 +92,7 @@ namespace DungeonExplorer
         {
             Console.WriteLine(GetText("menu"));
 
-            List<string> options = new List<string> { "1", "2", "3" };
+            string[] options = new string[] { "1", "2", "3" };
             string sel = ValidateInputSelection("Please enter 1, 2 or 3 from the menu options: ", options);
             
             // For debugging purposes, the first menu option "~ hit bed ~" will run when either 1,2 or 3 is entered by the user.
@@ -84,34 +101,23 @@ namespace DungeonExplorer
 
         private void InitialiseGame()
         {
-            bool skipTutorial = false;
-            Console.WriteLine(GetText("play"));
-            Console.WriteLine("Enter SKIP to skip the tutorial");
-            skipTutorial = (Console.ReadLine().Equals("SKIP"));
-
             Console.WriteLine(GetText("start"));
 
-            if (skipTutorial)
-            {
-                GameCustomisation();
-            }
-            else
-            {
-                StartTutorial();
-            }
+            // Text to be stored in XML files at later date.
+            WriteDialogue("*sporadically typing and deleting lines of code* \"if i use a struct instead of class definition...\"");
+            WriteDialogue("oh. i forgot i need to update the function in Game. otherwise, ill finish this off tomorrow.");
+            WriteDialogue("*sudden noise souding much louder than it should* \"gah!\" *glances at clock*");
+            string time = ValidateInputSelection("what time do you see? (10:10, 10:45, 11:30, 12:00, 12:05) ", new string[] {"10:10", "10:45", "11:30", "12:00", "12:05"});
+            WriteDialogue($"i have lectures at 12:00. probably shouldnt stay awake any longer");
+            WriteDialogue("*time slips away* \"need to make sure it saves and. and.. the push can wait.\"");
+            WriteDialogue("*tucks into bed* *shiver* *curls up tighter with blanket*");
+            WriteDialogue("\"no new messages, must... sleep..\"");
 
-        }
-        
-        private void StartTutorial()
-        {
-            //Console.WriteLine(GetText("tutorial"));
-            GameCustomisation();
+            Console.WriteLine(GetText("play"));
         }
 
         private void GameCustomisation()
         {
-            player.PlayerState();
-            Console.WriteLine(player.InventoryContents());
         }
         private void GameLoop()
         {
