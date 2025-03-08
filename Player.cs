@@ -1,14 +1,21 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net.NetworkInformation;
 using System.Security.Policy;
 using DungeonExplorer;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace DungeonExplorer
 {
     public class Player
     {   
-        public string Name { get; private set; }
+        public string Name 
+        { 
+            get; 
+            private set;
+        }
+
         public struct pronouns 
         {   
             private string[] Possessives;
@@ -21,9 +28,9 @@ namespace DungeonExplorer
 
             public pronouns(string[] possessives, string[] thirds)
             {
-                if (possessives == null)
+                if (possessives.Length == 0)
                     possessives = new string[] { "/redacted/" };
-                if (thirds == null)
+                if (thirds.Length == 0)
                     thirds = new string[] { "/redacted/" };
                 Possessives = possessives;  
                 Thirds = thirds;
@@ -38,17 +45,35 @@ namespace DungeonExplorer
         public PlayerAttribute Resilience;
         public PlayerAttribute Creativity;
 
-        public Player(string name, int hope) 
+        public Player()
         {
-            Name = name;
             Hope = new PlayerAttribute("Hope", "100");
             Resilience = new PlayerAttribute("Resilience", "100");
             Creativity = new PlayerAttribute("Creativity", "100");
             inventoryManager = new InventoryManager();
         }
 
-        public void SetPronouns()
+        public void SetName()
         {
+            string name = "0";
+            bool validName = false;
+            while (!validName)
+            {
+                Console.Write("the name reads: ");
+                name = Console.ReadLine();
+                if (name.Length > 30)
+                    Console.WriteLine("\nName must be less than 30 characters long.\n");
+                else if (!name.All(char.IsLetter))
+                    Console.WriteLine("\nName must not contain digits: only letters of English alphabet.\n");
+                else
+                    validName = true;
+            }
+            Name = name;
+            SetPronouns();
+        }
+
+        public void SetPronouns()
+        {   
             List<string> possessives = new List<string>();
             List<string> thirds = new List<string>();
 
@@ -57,31 +82,36 @@ namespace DungeonExplorer
 
             string next;
 
-            Console.WriteLine("Who... who am i? no. i know...");
-            Console.WriteLine("please enter your preferred pronouns ");
+            Console.WriteLine("\nwith pronouns: ");
             while (addPossessive || addThird)
             {
                 string possessive = "";
                 string third = "";
 
-                next = Game.ValidateInputSelection("Would you like to add another third person pronoun? Y/N ");
-                if (next == "N")
-                    addThird = false;
-                else
+                if (addThird)
                 {
-                    Console.Write("*third person* e.g. they/he/xe ");
-                    third = Console.ReadLine();
-                    thirds.Add(third);
+                    next = Game.ValidateInputSelection("Would you like to add another third person pronoun? Y/N ");
+                    if (next == "N")
+                        addThird = false;
+                    else
+                    {
+                        Console.Write("*third person* e.g. they/he/xe ");
+                        third = Console.ReadLine();
+                        thirds.Add(third);
+                    }
                 }
 
-                next = Game.ValidateInputSelection("Would you like to add another possessive? Y/N ");
-                if (next == "N")
-                    addPossessive = false;
-                else
+                if(addPossessive)
                 {
-                    Console.Write("*possessive* e.g. their/his/xer ");
-                    possessive = Console.ReadLine();
-                    possessives.Add(possessive);
+                    next = Game.ValidateInputSelection("Would you like to add another possessive? Y/N ");
+                    if (next == "N")
+                        addPossessive = false;
+                    else
+                    {
+                        Console.Write("*possessive* e.g. their/his/xer ");
+                        possessive = Console.ReadLine();
+                        possessives.Add(possessive);
+                    }
                 }
             }
 

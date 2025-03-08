@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Dialogues>
-	<Dialogue name="introduction-1">
+	<introduction-1>
 		<text>
 			*sporadically typing and deleting lines of code* "if i use a struct instead of class definition...
-			oh. i forgot i need to update the function in Game. otherwise, ill finish this off tomorrow.
+			oh. i forgot i need to update the function in Game. otherwise, i'll finish this off tomorrow.
 			*sudden noise souding much louder than it should* "gah!" *glances at clock*
 		</text>
-	</Dialogue>	
-	<Dialogue name="introduction-2">
+	</introduction-1>	
+	<introduction-2>
 		<text>
 			"i have lectures at 12:00. probably shouldnt stay awake any longer
 			*time slips away* "need to make sure it saves and. and.. the push can wait."
@@ -22,7 +22,12 @@
 			"the blue transparent plastic obscures water, so i shouldn't be able to see it. why is it so vibrant?"
 			*water appears blue* "not just blue but, ive seen this colour before.."
 			"not any shade of blue. no shade at all. just... blue?"
-			"RGB scale would be (0, 0, 255)"
-		</text>	
-	</Dialogue>
+			"RGB scale would be (0, 0, 255)"\n
+		</text>
+	</introduction-2>
+	<introduction-4>
+		<text>
+			*ID card falls out of coat pocket*
+		</text>
+	</introduction-4>
 </Dialogues>

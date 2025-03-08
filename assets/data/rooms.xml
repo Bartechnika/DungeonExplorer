@@ -1,11 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Rooms>
-	<Room name="train-platform">
+	<train-platform>
 		<name>
 			Train platform
 		</name>
 		<description>
 			A small train platform in a local village commonly frequented by college students.
 		</description>
-	</Room>
+	</train-platform>
+	<bathroom>
+		<name>
+			Bathroom
+		</name>
+		<description>
+			A small bathroom with a shower to the left. Toiletries sat idling in cups stacked along the window sill.
+		</description>
+		<location name="top-shelf" locked="False"></location>
+		<location name="bathroom-door" locked="True"></location>
+	</bathroom>
 </Rooms>

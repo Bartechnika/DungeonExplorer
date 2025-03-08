@@ -14,7 +14,7 @@ namespace DungeonExplorer
     public class Game
     {
         private Player player;
-        private Room currentRoom;
+        private Room curRoom;
         public string workingDir { get; set; }
         public string curDir { get; set; }
         public static string artDir { get; set; }
@@ -28,9 +28,10 @@ namespace DungeonExplorer
             textDir = curDir + "\\assets\\data\\";
 
             // Initialize the game with one room and one player
-            player = new Player("barts", 1);
+            player = new Player();
             player.InventoryContents();
-            currentRoom = new Room("train-platform");
+
+            curRoom = new Room("bathroom");
         }
 
         public static string GetArt(string file)
@@ -46,42 +47,33 @@ namespace DungeonExplorer
             }
         }
 
-        public static string[] GetText(string file, string header_name)
+        public static string[] GetText(string header_name)
         {
             string txt = "";
-            string path = textDir + file + ".xml";
+            string path = textDir + "dialogue.xml";
             if (File.Exists(path))
             {
-                XmlTextReader reader = new XmlTextReader(path);
-                while (reader.Read())
-                {
-                    if (reader.NodeType == XmlNodeType.Element)
-                    {
-                        if(reader.GetAttribute("name") == header_name)
-                        {
-                            var innerReader = reader.ReadSubtree();
-                            while(innerReader.Read())
-                            {   
-                                if (innerReader.NodeType == XmlNodeType.Text)
-                                {
-                                    txt = (innerReader.Value.Trim());
-                                }
-                            }
-                        }
-                    }
-                }
+                txt = XElement.Load(path).Element(header_name).Element("text").Value.Trim();
             }
             else
             {
                 throw new FileNotFoundException("File does not exist...");
             }
 
-            string[] line = txt.Split(new string[] { Environment.NewLine }, StringSplitOptions.None);
+            string[] line = txt.Split(new[] { '\r', '\n' });
             for (int i = 0; i < line.Length; i++)
             {
                 line[i] = line[i].Trim();
             }
             return line;
+        }
+
+        public static string PopulateField(string art, string field, string para)
+        {   
+
+            para = para + new string(' ', field.Length - para.Length);
+            Console.WriteLine(para, "test");
+            return art.Replace(field, para);
         }
 
         // Display dialogue appearing from left to right with a time delay.
@@ -151,15 +143,24 @@ namespace DungeonExplorer
         {
             Console.WriteLine(GetArt("start"));
 
-            string[] txt = GetText("dialogue", "introduction-1");
+            string[] txt = GetText("introduction-1");
             WriteDialogue(txt);
             
             string time = ValidateInputSelection("what time do you see? (10:10, 10:45, 11:30, 12:00, 12:05) ", new string[] {"10:10", "10:45", "11:30", "12:00", "12:05"});
 
             Console.WriteLine(GetArt("play"));
 
-            txt = GetText("dialogue", "introduction-2");
+            txt = GetText("introduction-2");
             WriteDialogue(txt);
+
+            txt = GetText("introduction-4");
+            WriteDialogue(txt);
+
+            player.SetName();
+            string id = GetArt("id");
+            id = PopulateField(id, "{name~~~~~~~~~~~~~~~~~~~~~~~~~}", player.Name);
+            id = PopulateField(id, "{pronouns~~~~~~~~~~~~~~~~~}", player.myPronouns.GetThird()+ "/"+player.myPronouns.GetPossessive());
+            Console.WriteLine(id);
         }
 
         private void GameCustomisation()
