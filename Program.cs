@@ -9,7 +9,6 @@ using System.Threading.Tasks;
 
 namespace DungeonExplorer
 {   
-
     public class Program
     {
         static void Main(string[] args)

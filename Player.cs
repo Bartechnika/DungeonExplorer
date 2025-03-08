@@ -114,7 +114,7 @@ namespace DungeonExplorer
         /// </summary>
         public void PlayerState()
         {
-            string player_art = Game.GetText("player");
+            string player_art = Game.GetArt("player");
             string s = player_art.Replace("{hope}", Hope.Value);
             s = s.Replace("{planning}", Resilience.Value);
             s = s.Replace("{creativity}", Creativity.Value);

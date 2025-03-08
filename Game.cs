@@ -5,6 +5,9 @@ using System.Collections.Generic;
 using System.Diagnostics.SymbolStore;
 using System.ComponentModel;
 using System.Threading;
+using System.Xml;
+using System.Globalization;
+using System.Xml.Linq;
 
 namespace DungeonExplorer
 {
@@ -14,20 +17,24 @@ namespace DungeonExplorer
         private Room currentRoom;
         public string workingDir { get; set; }
         public string curDir { get; set; }
-        static public string artDir { get; set; }
+        public static string artDir { get; set; }
+        public static string textDir {  get; set; }
         public Game()
         {
             // Initialise directory variables
             workingDir = Environment.CurrentDirectory;
             curDir = Directory.GetParent(workingDir).Parent.FullName;
-            artDir = curDir + "\\art\\";
+            artDir = curDir + "\\assets\\art\\";
+            textDir = curDir + "\\assets\\data\\";
 
             // Initialize the game with one room and one player
             player = new Player("barts", 1);
             player.InventoryContents();
+            currentRoom = new Room("train-platform");
         }
-        public static string GetText(string file)
-        {
+
+        public static string GetArt(string file)
+        {   
             string path = artDir + file + ".txt";
             if (File.Exists(path))
             {
@@ -39,17 +46,58 @@ namespace DungeonExplorer
             }
         }
 
+        public static string[] GetText(string file, string header_name)
+        {
+            string txt = "";
+            string path = textDir + file + ".xml";
+            if (File.Exists(path))
+            {
+                XmlTextReader reader = new XmlTextReader(path);
+                while (reader.Read())
+                {
+                    if (reader.NodeType == XmlNodeType.Element)
+                    {
+                        if(reader.GetAttribute("name") == header_name)
+                        {
+                            var innerReader = reader.ReadSubtree();
+                            while(innerReader.Read())
+                            {   
+                                if (innerReader.NodeType == XmlNodeType.Text)
+                                {
+                                    txt = (innerReader.Value.Trim());
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            else
+            {
+                throw new FileNotFoundException("File does not exist...");
+            }
+
+            string[] line = txt.Split(new string[] { Environment.NewLine }, StringSplitOptions.None);
+            for (int i = 0; i < line.Length; i++)
+            {
+                line[i] = line[i].Trim();
+            }
+            return line;
+        }
+
         // Display dialogue appearing from left to right with a time delay.
-        public static void WriteDialogue(string message, int wait = 1000)
+        public static void WriteDialogue(string[] message, int wait = 1000)
         {
             int charDelay = 35;
-            foreach(char c in message)
+            foreach(string s in message)
             {   
-                System.Threading.Thread.Sleep(charDelay);
-                Console.Write(c);
+                foreach(char c in s)
+                {
+                    System.Threading.Thread.Sleep(charDelay);
+                    Console.Write(c);
+                }
+                Console.Write('\n');
+                System.Threading.Thread.Sleep(wait);
             }
-            Console.Write('\n');
-            System.Threading.Thread.Sleep(wait);
         }
 
         public static string ValidateInputSelection(string message, string[] options = null)
@@ -84,13 +132,13 @@ namespace DungeonExplorer
 
         private void GameIntroduction()
         {
-            Console.WriteLine(GetText("intro"));
+            Console.WriteLine(GetArt("intro"));
             MainMenu();
         }
 
         private void MainMenu()
         {
-            Console.WriteLine(GetText("menu"));
+            Console.WriteLine(GetArt("menu"));
 
             string[] options = new string[] { "1", "2", "3" };
             string sel = ValidateInputSelection("Please enter 1, 2 or 3 from the menu options: ", options);
@@ -101,19 +149,17 @@ namespace DungeonExplorer
 
         private void InitialiseGame()
         {
-            Console.WriteLine(GetText("start"));
+            Console.WriteLine(GetArt("start"));
 
-            // Text to be stored in XML files at later date.
-            WriteDialogue("*sporadically typing and deleting lines of code* \"if i use a struct instead of class definition...\"");
-            WriteDialogue("oh. i forgot i need to update the function in Game. otherwise, ill finish this off tomorrow.");
-            WriteDialogue("*sudden noise souding much louder than it should* \"gah!\" *glances at clock*");
+            string[] txt = GetText("dialogue", "introduction-1");
+            WriteDialogue(txt);
+            
             string time = ValidateInputSelection("what time do you see? (10:10, 10:45, 11:30, 12:00, 12:05) ", new string[] {"10:10", "10:45", "11:30", "12:00", "12:05"});
-            WriteDialogue($"i have lectures at 12:00. probably shouldnt stay awake any longer");
-            WriteDialogue("*time slips away* \"need to make sure it saves and. and.. the push can wait.\"");
-            WriteDialogue("*tucks into bed* *shiver* *curls up tighter with blanket*");
-            WriteDialogue("\"no new messages, must... sleep..\"");
 
-            Console.WriteLine(GetText("play"));
+            Console.WriteLine(GetArt("play"));
+
+            txt = GetText("dialogue", "introduction-2");
+            WriteDialogue(txt);
         }
 
         private void GameCustomisation()

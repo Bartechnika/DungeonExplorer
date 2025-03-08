@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Dialogues>
+	<Dialogue name="introduction-1">
+		<text>
+			*sporadically typing and deleting lines of code* "if i use a struct instead of class definition...
+			oh. i forgot i need to update the function in Game. otherwise, ill finish this off tomorrow.
+			*sudden noise souding much louder than it should* "gah!" *glances at clock*
+		</text>
+	</Dialogue>	
+	<Dialogue name="introduction-2">
+		<text>
+			"i have lectures at 12:00. probably shouldnt stay awake any longer
+			*time slips away* "need to make sure it saves and. and.. the push can wait."
+			*tucks into bed* *shiver* *curls up tighter with blanket*
+			"no new messages, must... sleep.."
+			*winces as light flows gently into room* mumbles "thought i closed the blinds?"
+			"to early, my head is throbbing" *snuggles closer into blanket*
+			*drifts off*
+			"thirsty. this bottle is empty. *savouring last drops*"
+			"YECCH PEUH this water is disgusting!"
+			"eyes straining* why is the water.. that.. it looks off"
+			"the blue transparent plastic obscures water, so i shouldn't be able to see it. why is it so vibrant?"
+			*water appears blue* "not just blue but, ive seen this colour before.."
+			"not any shade of blue. no shade at all. just... blue?"
+			"RGB scale would be (0, 0, 255)"
+		</text>	
+	</Dialogue>
+</Dialogues>
