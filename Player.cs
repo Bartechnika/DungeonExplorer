@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.Design;
 using System.Linq;
 using System.Net.NetworkInformation;
 using System.Security.Policy;
@@ -41,15 +42,20 @@ namespace DungeonExplorer
 
         public Dictionary<Room, PlayerAttribute> rooms = new Dictionary<Room, PlayerAttribute>();
         public InventoryManager inventoryManager;
+
+        /// <summary>
+        ///  Player attributes
+        /// </summary>
         public PlayerAttribute Hope;
-        public PlayerAttribute Resilience;
-        public PlayerAttribute Creativity;
+        public PlayerAttribute Imagination;
+        public PlayerAttribute Energy;
+
 
         public Player()
         {
-            Hope = new PlayerAttribute("Hope", "100");
-            Resilience = new PlayerAttribute("Resilience", "100");
-            Creativity = new PlayerAttribute("Creativity", "100");
+            Hope = new PlayerAttribute("Hope", 100);
+            Imagination = new PlayerAttribute("Imagination", 100);
+            Energy = new PlayerAttribute("Energy", 100);
             inventoryManager = new InventoryManager();
         }
 
@@ -59,7 +65,7 @@ namespace DungeonExplorer
             bool validName = false;
             while (!validName)
             {
-                Console.Write("the name reads: ");
+                Console.Write("\nthe name reads: ");
                 name = Console.ReadLine();
                 if (name.Length > 30)
                     Console.WriteLine("\nName must be less than 30 characters long.\n");
@@ -121,13 +127,32 @@ namespace DungeonExplorer
         public class PlayerAttribute
         {
             public string Name { get; private set; }
-            public string Value { get; private set; }
+            private int _value;
+            public int Value
+            {
+                get => _value;
+                set
+                {
+                    if(value < 0 || value > 100)
+                    {
+                        _value = 0;
+                    }
 
-            public PlayerAttribute(string name, string value)
+                    _value = value;
+                }
+            }
+
+            public PlayerAttribute(string name, int value)
             {
                 Name = name;
                 Value = value;
             }
+        }
+
+        public void TakeDamage(int overwhelmFactor)
+        {
+            Hope.Value -= overwhelmFactor;
+            Console.WriteLine($"\nYour hope was reduced to {Hope.Value} by {overwhelmFactor} points.\n");
         }
 
         public void AccumulateStuff(string stuff)
@@ -145,9 +170,8 @@ namespace DungeonExplorer
         public void PlayerState()
         {
             string player_art = Game.GetArt("player");
-            string s = player_art.Replace("{hope}", Hope.Value);
-            s = s.Replace("{planning}", Resilience.Value);
-            s = s.Replace("{creativity}", Creativity.Value);
+            string s = player_art.Replace("{hope}", Hope.Value.ToString());
+            s = s.Replace("{creativity}", Imagination.Value.ToString());
             Console.WriteLine(s);
         }
     }

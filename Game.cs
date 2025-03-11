@@ -8,6 +8,9 @@ using System.Threading;
 using System.Xml;
 using System.Globalization;
 using System.Xml.Linq;
+using static System.Net.Mime.MediaTypeNames;
+using System.Text.RegularExpressions;
+using System.Runtime.ConstrainedExecution;
 
 namespace DungeonExplorer
 {
@@ -30,8 +33,6 @@ namespace DungeonExplorer
             // Initialize the game with one room and one player
             player = new Player();
             player.InventoryContents();
-
-            curRoom = new Room("bathroom");
         }
 
         public static string GetArt(string file)
@@ -47,7 +48,13 @@ namespace DungeonExplorer
             }
         }
 
-        public static string[] GetText(string header_name)
+        public static string PopulateField(string art, string field, string para)
+        {
+            para = para + new string(' ', field.Length - para.Length);
+            return art.Replace(field, para);
+        }
+
+        public static void GetDialogue(string header_name)
         {
             string txt = "";
             string path = textDir + "dialogue.xml";
@@ -60,6 +67,11 @@ namespace DungeonExplorer
                 throw new FileNotFoundException("File does not exist...");
             }
 
+            WriteDialogue(txt);
+        }
+
+        public static string[] StripText(string txt)
+        {
             string[] line = txt.Split(new[] { '\r', '\n' });
             for (int i = 0; i < line.Length; i++)
             {
@@ -68,23 +80,16 @@ namespace DungeonExplorer
             return line;
         }
 
-        public static string PopulateField(string art, string field, string para)
-        {   
-
-            para = para + new string(' ', field.Length - para.Length);
-            Console.WriteLine(para, "test");
-            return art.Replace(field, para);
-        }
-
         // Display dialogue appearing from left to right with a time delay.
-        public static void WriteDialogue(string[] message, int wait = 1000)
+        public static void WriteDialogue(string message, int wait = 1000)
         {
+            string[] dialogue = StripText(message);
             int charDelay = 35;
-            foreach(string s in message)
+            foreach(string s in dialogue)
             {   
                 foreach(char c in s)
                 {
-                    System.Threading.Thread.Sleep(charDelay);
+                    //System.Threading.Thread.Sleep(charDelay);
                     Console.Write(c);
                 }
                 Console.Write('\n');
@@ -97,7 +102,7 @@ namespace DungeonExplorer
             // If the optional parameter "options" is not defined in the function call
             // it is set by default to provide the player with a yes/no choice.
             options = options ?? new string[] {"Y", "N"};
-            string sel = null;
+            string sel = "";
             bool validInput = false;
             while (!validInput)
             {
@@ -134,41 +139,59 @@ namespace DungeonExplorer
 
             string[] options = new string[] { "1", "2", "3" };
             string sel = ValidateInputSelection("Please enter 1, 2 or 3 from the menu options: ", options);
-            
+
             // For debugging purposes, the first menu option "~ hit bed ~" will run when either 1,2 or 3 is entered by the user.
-            InitialiseGame();
+            //InitialiseGame();
+            GameLoop();
         }
 
         private void InitialiseGame()
         {
             Console.WriteLine(GetArt("start"));
-
-            string[] txt = GetText("introduction-1");
-            WriteDialogue(txt);
+            GetDialogue("introduction-1");
             
             string time = ValidateInputSelection("what time do you see? (10:10, 10:45, 11:30, 12:00, 12:05) ", new string[] {"10:10", "10:45", "11:30", "12:00", "12:05"});
+            player.Imagination.Value = 100;
+
+            GetDialogue("introduction-2");
+            GetDialogue("introduction-3");
 
             Console.WriteLine(GetArt("play"));
 
-            txt = GetText("introduction-2");
-            WriteDialogue(txt);
+            GetDialogue("introduction-4");
 
-            txt = GetText("introduction-4");
-            WriteDialogue(txt);
+            Console.WriteLine("\n*New attribute unlocked: hope (HP)*\n");
 
-            player.SetName();
-            string id = GetArt("id");
-            id = PopulateField(id, "{name~~~~~~~~~~~~~~~~~~~~~~~~~}", player.Name);
-            id = PopulateField(id, "{pronouns~~~~~~~~~~~~~~~~~}", player.myPronouns.GetThird()+ "/"+player.myPronouns.GetPossessive());
-            Console.WriteLine(id);
+            GetDialogue("introduction-5");
+            GetDialogue("introduction-6");
+
+            GameCustomisation();
         }
 
         private void GameCustomisation()
         {
+            string txt;
+            GetDialogue("introduction-7");
+
+            player.SetName();
+            string id = GetArt("id");
+            id = PopulateField(id, "{name~~~~~~~~~~~~~~~~~~~~~~~~~}", player.Name);
+            id = PopulateField(id, "{pronouns~~~~~~~~~~~~~~~~~}", player.myPronouns.GetThird() + "/" + player.myPronouns.GetPossessive());
+            Console.WriteLine(id);
+
+            GameLoop();
         }
+
         private void GameLoop()
         {
 
+            RoomManager roomManager = new RoomManager(player);
+
+            bool playing = true;
+            while (playing)
+            {
+                roomManager.Update();
+            }
         }
     }
 }

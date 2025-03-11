@@ -13,6 +13,10 @@
 			*time slips away* "need to make sure it saves and. and.. the push can wait."
 			*tucks into bed* *shiver* *curls up tighter with blanket*
 			"no new messages, must... sleep.."
+		</text>
+	</introduction-2>
+	<introduction-3>
+		<text>
 			*winces as light flows gently into room* mumbles "thought i closed the blinds?"
 			"to early, my head is throbbing" *snuggles closer into blanket*
 			*drifts off*
@@ -24,10 +28,33 @@
 			"not any shade of blue. no shade at all. just... blue?"
 			"RGB scale would be (0, 0, 255)"\n
 		</text>
-	</introduction-2>
+	</introduction-3>
 	<introduction-4>
+		<text>
+			*pulls self out of bed and walks over to door* "woahhh, thats not going to worrk" *collapses onto bed*
+			"im just going to lie here for. a while. and NOT go back to sleep"
+			*several minutes pass* "lets try this again"
+		</text>
+	</introduction-4>
+	<introduction-5>
+		<text>
+			"gah - i feel groggy" *heads to bathroom - pauses*
+			"i need to get dressed first" "i - don't really want to step out my room feeling like this"
+			*walks over to drawers*
+		</text>
+	</introduction-5>
+	<introduction-6>
+		<text>
+			*now, I know i like monochrome outfits - like this t-shirt. 
+			but last night i dont think they were ALL a single colour...*
+			muttering: "red, yellow, ... primary colours: 
+			cyan is the about the most interesting shade here. it goes with? something? anyway.."
+			*closes draw*
+		</text>
+	</introduction-6>
+	<introduction-7>
 		<text>
 			*ID card falls out of coat pocket*
 		</text>
-	</introduction-4>
+	</introduction-7>
 </Dialogues>

@@ -1,5 +1,35 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Rooms>
+	<bathroom>
+		<name>
+			Bathroom
+		</name>
+		<description>
+			A small bathroom with a shower to the left. 
+			Toiletries sat idling in cups stacked along the window sill.
+		</description>
+		<start>
+			You trudge into the bathroom half-awake and make your way to the cabinet.
+		</start>
+		<location name="cabinet" adj="sink:true,bathroom-door:false" intro="You reach for your toothbrush.">
+			<interaction type="dialogue">*you reach out to grab your toothbrush*</interaction>
+		</location>
+		<location name="sink" adj="bathroom-door:false" intro="run away!">
+			<interaction type="battle-demons">
+				<creature name="Water Conjuror" type="sensory-creature" of="1">
+					*New attribute unlocked: resilience*
+					Fighting increases your resilience - you can't flee forever.
+				</creature>
+			</interaction>
+		</location>
+		<location name="bathroom-door" adj="sink:true" intro="">
+			<interaction type="dialogue">you turn to leave</interaction>
+		</location>
+		<exit>
+			You hastily leave the room, tap still running.
+		</exit>
+		<next>train-platform</next>
+	</bathroom>
 	<train-platform>
 		<name>
 			Train platform
@@ -7,15 +37,18 @@
 		<description>
 			A small train platform in a local village commonly frequented by college students.
 		</description>
+		<start>
+			I arrived early enough - right?
+		</start>
+		<location name="entrance" adj="platform:true" intro="Welcome to Hawkins Station.">
+			<interaction type="dialogue">*you look at the train times to your left*</interaction>
+		</location>
+		<location name="platform" adj="entrance:true" intro="Waaaah waaaah waaaaah!!! TOOT TOOT">
+			<interaction type="dialogue">trains speed by slowly</interaction>
+		</location>
+		<exit>
+			You hastily leave the room, tap still running.
+		</exit>
+		<next>bathroom</next>
 	</train-platform>
-	<bathroom>
-		<name>
-			Bathroom
-		</name>
-		<description>
-			A small bathroom with a shower to the left. Toiletries sat idling in cups stacked along the window sill.
-		</description>
-		<location name="top-shelf" locked="False"></location>
-		<location name="bathroom-door" locked="True"></location>
-	</bathroom>
 </Rooms>
