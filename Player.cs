@@ -17,48 +17,94 @@ namespace DungeonExplorer
             private set;
         }
 
+        /// <summary>
+        /// Struct <c>pronouns</c> allows the user to set any number of subject, object and possessive pronouns.
+        /// </summary>
         public struct pronouns 
-        {   
+        {
+            /// <value>
+            /// Property <c>Subjects</c> is a list of all subject pronouns chosen by the user
+            /// </value>
+            /// <example>
+            /// For example:
+            /// <c>Subjects = new string[] {"She", "They"}</c>
+            /// </example>
+            private string[] Subjects;
+
+            /// <value>
+            /// Property <c>Objects</c> is a list of all object pronouns chosen by the user
+            /// </value>
+            /// <example>
+            /// For example:
+            /// <c>Objects = new string[] {"Her", "Them"}c>
+            /// </example>
+            private string[] Objects;
+
+            /// <value>
+            /// Property <c>Possessives</c> is a list of all possessive pronouns chosen by the user
+            /// </value>
+            /// <example>
+            /// For example:
+            /// <c>Posessives = new string[] {"Hers", "Theirs"}</c>
+            /// </example>
             private string[] Possessives;
-            private string[] Thirds; 
 
             private static Random rnd = new Random();
 
+            /// <summary>
+            /// Methods <c>GetSubject</c>, <c>GetObjects</c> and <c>GetPossessive</c> return a random pronoun of their respective type.
+            /// </summary>
+            public string GetSubject() => Subjects[rnd.Next(0, Subjects.Length)];
+            public string GetObject() => Objects[rnd.Next(0, Objects.Length)];
             public string GetPossessive() => Possessives[rnd.Next(0, Possessives.Length)];
-            public string GetThird() => Thirds[rnd.Next(0, Thirds.Length)];
 
-            public pronouns(string[] possessives, string[] thirds)
+            public pronouns(string[] subjects, string[] objects, string[] possessives)
             {
+                Subjects = subjects;
+                Objects = objects;
+                Possessives = possessives;
+
+                if (subjects.Length == 0)
+                    Subjects = new string[] { "404" };
+                if (objects.Length == 0)
+                    Objects = new string[] { "404" };
                 if (possessives.Length == 0)
-                    possessives = new string[] { "/redacted/" };
-                if (thirds.Length == 0)
-                    thirds = new string[] { "/redacted/" };
-                Possessives = possessives;  
-                Thirds = thirds;
+                    Possessives = new string[] { "404" };
             }
         }
 
         public pronouns myPronouns;
 
-        public Dictionary<Room, PlayerAttribute> rooms = new Dictionary<Room, PlayerAttribute>();
-        public InventoryManager inventoryManager;
+        public PlayerManager playerManager;
 
-        /// <summary>
-        ///  Player attributes
-        /// </summary>
-        public PlayerAttribute Hope;
+        /// <value>
+        /// Property <c>Resilience</c> is a measure of the player's to persevere in the face of difficulty. 
+        /// </value>
+        public PlayerAttribute Resilience;
+
+        /// <value>
+        /// Property <c>Imagination</c> is a measure of the player's ability to think outside the box.
+        /// </value>
         public PlayerAttribute Imagination;
-        public PlayerAttribute Energy;
 
+        /// <value>
+        /// Property <c>Energy</c> is a measure of how much more of this the player can take.
+        /// </value>
+        public PlayerAttribute Energy;
 
         public Player()
         {
-            Hope = new PlayerAttribute("Hope", 100);
-            Imagination = new PlayerAttribute("Imagination", 100);
-            Energy = new PlayerAttribute("Energy", 100);
-            inventoryManager = new InventoryManager();
+            Resilience = new PlayerAttribute("Resilience", 0);
+            Imagination = new PlayerAttribute("Imagination", 0);
+            Energy = new PlayerAttribute("Energy", 0);
         }
 
+        /// <summary>
+        /// Method <c>SetName</c> performs input validation on the name chosen by the player.
+        /// </summary>
+        /// <remarks>
+        /// Length of player name must be in range 1-30 characters and can only contain chars of type letter.
+        /// </remarks>
         public void SetName()
         {
             string name = "0";
@@ -67,10 +113,10 @@ namespace DungeonExplorer
             {
                 Console.Write("\nthe name reads: ");
                 name = Console.ReadLine();
-                if (name.Length > 30)
-                    Console.WriteLine("\nName must be less than 30 characters long.\n");
+                if (name.Length < 1 || name.Length > 30)
+                    Console.WriteLine("Name must be between 1 and 30 characters long.");
                 else if (!name.All(char.IsLetter))
-                    Console.WriteLine("\nName must not contain digits: only letters of English alphabet.\n");
+                    Console.WriteLine("Name must not contain digits: only letters of English alphabet.");
                 else
                     validName = true;
             }
@@ -78,101 +124,105 @@ namespace DungeonExplorer
             SetPronouns();
         }
 
+        /// <summary>
+        /// Method <c>SetPronouns</c> constructs pronoun lists for the player.
+        /// </summary>
         public void SetPronouns()
         {   
-            List<string> possessives = new List<string>();
-            List<string> thirds = new List<string>();
+            List<string> Subjects = new List<string>();
+            List<string> Objects = new List<string>();
+            List<string> Possessives = new List<string>();
 
+            bool addSubject = true;
+            bool addObject = true;
             bool addPossessive = true;
-            bool addThird = true;
 
             string next;
 
             Console.WriteLine("\nwith pronouns: ");
-            while (addPossessive || addThird)
+            while (addSubject || addObject || addPossessive)
             {
-                string possessive = "";
-                string third = "";
-
-                if (addThird)
+                if (addSubject)
                 {
-                    next = Game.ValidateInputSelection("Would you like to add another third person pronoun? Y/N ");
+                    next = Game.ValidateInputSelection("Would you like to add another subject pronoun? Y/N ");
                     if (next == "N")
-                        addThird = false;
+                        addSubject = false;
                     else
                     {
-                        Console.Write("*third person* e.g. they/he/xe ");
-                        third = Console.ReadLine();
-                        thirds.Add(third);
+                        Console.Write("*subject pronoun* e.g. She/He/They/Xe ");
+                        Subjects.Add(Console.ReadLine());
                     }
                 }
 
-                if(addPossessive)
+                if(addObject)
                 {
-                    next = Game.ValidateInputSelection("Would you like to add another possessive? Y/N ");
+                    next = Game.ValidateInputSelection("Would you like to add another object pronoun? Y/N ");
                     if (next == "N")
-                        addPossessive = false;
+                    {
+                        addObject = false;
+                    }
                     else
                     {
-                        Console.Write("*possessive* e.g. their/his/xer ");
-                        possessive = Console.ReadLine();
-                        possessives.Add(possessive);
+                        Console.Write("*object pronoun* e.g. Her/Him/Them/Xem ");
+                        Objects.Add(Console.ReadLine());
+                    }
+                }
+
+                if (addPossessive)
+                {
+                    next = Game.ValidateInputSelection("Would you like to add another possessive pronoun? Y/N ");
+                    if (next == "N")
+                    {
+                        addPossessive = false;
+                    }
+                    else
+                    {
+                        Console.Write("*possessive pronoun* e.g. Hers/His/Theirs/Xyrs ");
+                        Possessives.Add(Console.ReadLine());
                     }
                 }
             }
 
-            myPronouns = new pronouns(possessives.ToArray(), thirds.ToArray());
+            myPronouns = new pronouns(Subjects.ToArray(), Objects.ToArray(), Possessives.ToArray());
         }
 
+        /// <summary>
+        /// Class <c>PlayerAttribute</c> represents an attribute of the player.
+        /// </summary>
         public class PlayerAttribute
         {
             public string Name { get; private set; }
+            public Player player;
             private int _value;
+
             public int Value
             {
                 get => _value;
                 set
                 {
-                    if(value < 0 || value > 100)
+                    _value = value;
+                    if (value < 0 || value > 100)
                     {
                         _value = 0;
                     }
-
-                    _value = value;
                 }
             }
+            public int Boost;
 
             public PlayerAttribute(string name, int value)
             {
                 Name = name;
                 Value = value;
-            }
-        }
-
-        public void TakeDamage(int overwhelmFactor)
-        {
-            Hope.Value -= overwhelmFactor;
-            Console.WriteLine($"\nYour hope was reduced to {Hope.Value} by {overwhelmFactor} points.\n");
-        }
-
-        public void AccumulateStuff(string stuff)
-        {
-            Console.WriteLine($"{stuff} is stored safely in your pocket.");
-        }
-        public string InventoryContents()
-        {   
-            return inventoryManager.ToString();
+            } 
         }
 
         /// <summary>
-        /// Output a visual representation of the player's state.
+        /// Method <c>Rest</c> is a stub called when the player becomes exhuasted from lack of energy.
         /// </summary>
-        public void PlayerState()
+        public void Rest()
         {
-            string player_art = Game.GetArt("player");
-            string s = player_art.Replace("{hope}", Hope.Value.ToString());
-            s = s.Replace("{creativity}", Imagination.Value.ToString());
-            Console.WriteLine(s);
+            Console.WriteLine("Overwhelmed, you curl into a ball and hibernate for 5 minutes\n");
+            System.Threading.Thread.Sleep(100000);
         }
     }
 }

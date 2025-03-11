@@ -45,7 +45,7 @@
   <ItemGroup>
     <Compile Include="Creatures.cs" />
     <Compile Include="Game.cs" />
-    <Compile Include="InventoryManager.cs" />
+    <Compile Include="PlayerManager.cs" />
     <Compile Include="InventorySlot.cs" />
     <Compile Include="Item.cs" />
     <Compile Include="ItemStack.cs" />

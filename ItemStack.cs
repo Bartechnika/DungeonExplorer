@@ -5,21 +5,24 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace DungeonExplorer
-{
+{   
+    /// <summary>
+    /// Class <c>ItemStack</c> is a container class for an Item type along with the amount stored.
+    /// </summary>
     public class ItemStack
-    {
-        public Item item;
-        public int amount;
+    {   
+        public Item Item;
+        public int Amount;
 
-        public ItemStack()
+        public ItemStack(Item item, int amount)
         {
-            item = new Item("Sword", 5);
-            amount = 0;
+            Item = item;
+            Amount= amount;
         }
 
         public override string ToString()
         {
-            return $"{item.ToString()} : {amount}";
+            return $"{Item.ToString()} : {Amount}";
         }
     }
 }

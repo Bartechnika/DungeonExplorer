@@ -14,30 +14,58 @@ using static DungeonExplorer.Room;
 using static DungeonExplorer.RoomManager;
 
 namespace DungeonExplorer
-{
+{   
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <para>
+    /// This class represents the basic Room object and consists of a set of locations.
+    /// Every room is instantiated by the RoomManager classes at the start of the game.
+    /// </para>
     public class Room
     {
         public string name;
         public string description;
-        public string startDialogue;
-        public string exitDialogue;
-        public string nextRoom;
-        public string prevRoom;
-        public location curLoc;
-        public location start;
-        public location exitLoc;
-        public Dictionary<string, location> locations;
-        public Player Player;
 
-        public Room(XElement room, Player player)
+        // The dialogue to be displayed when the user enters the room (if any)
+        public string startDialogue;
+
+        // The dialogue to be displayed when the user exits the room (if any)
+        public string exitDialogue;
+
+        // A pointer to the next room to enter when the player exists this room.
+        public string nextRoom;
+
+        // The current location of the player within the room.
+        public location curLoc;
+
+        // The location to load when the room is first entered.
+        public location start;
+
+        // A generic location with no purpose other than to leave the room.
+        public location exitLoc;
+
+        // A mapping between locations and their string-identifier.
+        public Dictionary<string, location> locations;
+        public PlayerManager ThisPlayerManager;
+        public RoomManager ThisRoomManager;
+
+        public Room(XElement room, PlayerManager playerManager, RoomManager roomManager)
         {
             this.locations = new Dictionary<string, location>();
             this.exitLoc = new location("exit", this);
+            this.ThisPlayerManager = playerManager;
+            this.ThisRoomManager = roomManager;
 
             InitialiseRoom(room);
-
+            ThisRoomManager = roomManager;
         }
 
+        /// <summary>
+        /// Method <c>InitialiseRoom</c> loads all necessary data for the room from the "rooms.xml" file.
+        /// </summary>
+        /// <param name="room"></param>
+        /// <exception cref="MissingFieldException"></exception>
         public void InitialiseRoom(XElement room)
         {
             name = room.Element("name").Value.Trim();
@@ -47,46 +75,66 @@ namespace DungeonExplorer
             nextRoom = room.Element("next").Value.Trim();
 
             var locationsList = room.Elements("location");
-                foreach (var loc in locationsList)
-                {
+            foreach (var loc in locationsList)
+            {
 
-                    location newLocation = new location(loc.Attribute("name").Value.ToString(), this);
-                    XElement interactionElement = loc.Element("interaction");
-                    newLocation.adjacentLocations = ParseAdjacentLocations(loc);
+                location newLocation = new location(loc.Attribute("name").Value.ToString(), this);
+                XElement interactionElement = loc.Element("interaction");
+                newLocation.adjacentLocations = ParseAdjacentLocations(loc);
 
-                    // For the interaction
-                    Interaction interaction;
+                Interaction interaction;
 
+                string dialogue;
                 switch (interactionElement.Attribute("type").Value)
                 {
                     case "dialogue":
-                        interaction = RoomManager.GetInteraction(interactionElement.Attribute("type").Value, interactionElement.Value);
+                        interaction = ThisRoomManager.GetInteraction(interactionElement.Attribute("type").Value, interactionElement.Value);
                         break;
                     case "battle-demons":
                         XElement creatureElement = interactionElement.Element("creature");
                         string name = creatureElement.Attribute("name").Value;
-                        string dialogue = creatureElement.Value;
+                        dialogue = creatureElement.Value;
                         int of = int.Parse(creatureElement.Attribute("of").Value);
-                        Creatures.Creature creature = new Creatures.SensoryCreature(name, dialogue, of, Player); 
-                        interaction = RoomManager.GetInteraction(interactionElement.Attribute("type").Value, interactionElement.Value, creature);
+                        Creatures.Creature creature = new Creatures.SensoryCreature(name, dialogue, of, ThisPlayerManager);
+                        interaction = ThisRoomManager.GetInteraction(interactionElement.Attribute("type").Value, interactionElement.Value, creature);
+                        break;
+                    case "found-item":
+                        XElement foundItem = interactionElement.Element("item");
+                        string itemId = foundItem.Attribute("id").Value;
+                        int amount = int.Parse(foundItem.Attribute("amount").Value);
+                        dialogue = foundItem.Value;
+                        interaction = ThisRoomManager.GetInteraction(interactionElement.Attribute("type").Value, dialogue, itemId: itemId, amount: amount);
+                        break;
+                    case "mirror":
+                        dialogue = interactionElement.Value;
+                        interaction = ThisRoomManager.GetInteraction(interactionElement.Attribute("type").Value, dialogue);
                         break;
                     default:
-                        throw new MissingFieldException("This interaction has attribute corresponding to a defined interaction");
-                        
+                        throw new MissingFieldException("This interaction does not have an attribute corresponding to a defined interaction");
+
                 }
+
                 newLocation.interaction = interaction;
                 newLocation.adjacentLocations = ParseAdjacentLocations(loc);
                 locations.Add(newLocation.Name, newLocation);
+
             }
 
             start = locations.Values.ToArray()[0];
         }
 
+        /// <summary>
+        /// Method <c>ParseAdjacentLocations</c> creates a mapping of every neighbouring location to its accessibility level.
+        /// </summary>
+        /// <param name="loc"></param>
+        /// <returns></returns>
+        /// <exception cref="MissingFieldException">
+        /// Thrown if the location has no attribute specifying the neighbouring nodes.
+        /// </exception>
         public Dictionary<string,bool> ParseAdjacentLocations(XElement loc)
         {   
             Dictionary<string, bool> adjLocsDict = new Dictionary<string, bool>();
             string adjLocs = loc.Attribute("adj") == null ? throw new MissingFieldException("This location of room has no attribute with name \"adj\"") : loc.Attribute("adj").Value;
-
 
             string[] adjLocsArr = adjLocs.Split(',');
             foreach(var adjLoc in adjLocsArr)
@@ -98,23 +146,40 @@ namespace DungeonExplorer
             return adjLocsDict;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <para>
+        /// This class stores all data relating to any location in the game. Every location has an associated interaction
+        /// which may be dialogue, a creature battle, an item discovery - or any feature not yet implemented such as puzzles.
+        /// </para>
         public class location
-        {
+        {   
             public string Name;
+
+            // Whether the location is currently accessible
             public string State;
+
+            // The associated interaction
             public Interaction interaction;
+
+            // The room the location is situated in
             public Room Room;
+
             public Dictionary<string, bool> adjacentLocations;
 
             public location(string name, Room room)
             {   
                 this.Name = name;
                 this.State = "closed";
-                this.interaction = new RoomManager.Dialogue("default");
                 this.Room = room;
                 this.adjacentLocations = new Dictionary<string, bool>();
             }
 
+            /// <summary>
+            /// Method <c>GetAdjacentLocations</c> outputs a list of all neighbouring locations and their accessiblity level,
+            /// which is either "unlocked" or "locked". A location may be unlocked once an objective has been completed, for example.
+            /// </summary>
             public void GetAdjacentLocations()
             {
                 ushort count = 0;
@@ -170,6 +235,7 @@ namespace DungeonExplorer
             bool exit = false;
             while (!exit)
             {
+                ThisPlayerManager.CalculateBoost();
                 locArt = Game.GetArt("location");
                 locArt = Game.PopulateField(locArt, "{location~~~~~~~~~~~}", curLoc.Name);
                 Console.WriteLine(locArt);

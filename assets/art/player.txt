@@ -1,12 +1,12 @@
 
 	 #####
-        ##^ ^##	  Planning: {planning}
-	# --- #
- 	  \ / 
- 	/--|--\    Creativity: {creativity}
-  	|( | )|   Hope: {hope}
-  	|\ | /|   
-  	| -|- |
+        #|^ ^|#	   Resilience: {resilience}
+	 \--J/ 	   Imagination: {imagination}
+ 	  | | 
+     o	/--|--\\   
+     \\//( | )||   Energy: {energy}
+      \/ \ | /||  
+         | | | o
          /   \
 	 |   |
 	 |   |

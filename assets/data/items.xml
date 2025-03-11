@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<items>
+	<item id="0" name="Student ID Card" type="card" baseBoost="5"></item>
+	<item id="1" name="Tiny Octopus Plushy" type="comfort-toy" baseBoost="10"></item>
+	<item id="2" name="Vape Sticker" type="card" baseBoost="-1"></item>
+</items>
