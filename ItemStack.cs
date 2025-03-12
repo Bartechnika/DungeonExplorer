@@ -11,9 +11,8 @@ namespace DungeonExplorer
     /// </summary>
     public class ItemStack
     {   
-        public Item Item;
-        public int Amount;
-
+        public Item Item { get; set; }
+        public int Amount { get; set; }
         public ItemStack(Item item, int amount)
         {
             Item = item;

@@ -27,7 +27,7 @@ namespace DungeonExplorer
         /// Property <c>BaseBoost</c> represents the boost given to the player's
         /// resilience.
         /// </value>
-        public int BaseBoost;
+        public int BaseBoost { get; private set; }
 
         public Item(string id, string name, int baseBoost=0)
         {
@@ -55,9 +55,8 @@ namespace DungeonExplorer
     }
 
     /// <summary>
-    /// Class <c>Comfort : Item</c> represents an item that increases the users resilience
-    /// by providing a comforting sensory experience with associated mental relief.
-    /// Interaction method is empty.
+    /// Class <c>Card : Item</c> represents an item that displays infomation or has some utility as
+    /// an ID.
     /// </summary>
     public class Card : Item
     {
@@ -70,7 +69,6 @@ namespace DungeonExplorer
     /// <summary>
     /// Class <c>Comfort : Item</c> represents an item that increases the users resilience
     /// by providing a comforting sensory experience with associated mental relief.
-    /// Interaction method is empty.
     /// </summary>
     public class ComfortToy : Item
     {

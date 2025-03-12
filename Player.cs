@@ -10,12 +10,8 @@ using static System.Net.Mime.MediaTypeNames;
 namespace DungeonExplorer
 {
     public class Player
-    {   
-        public string Name 
-        { 
-            get; 
-            private set;
-        }
+    {
+        public string Name { get; private set; }
 
         /// <summary>
         /// Struct <c>pronouns</c> allows the user to set any number of subject, object and possessive pronouns.
