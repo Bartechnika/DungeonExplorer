@@ -1,5 +1,7 @@
 ﻿using System;
+using System.CodeDom;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Management.Instrumentation;
@@ -13,10 +15,50 @@ namespace DungeonExplorer
 {
     public class PlayerManager
     {
-        public InventorySlot[] pockets = new InventorySlot[5];
-        public int nextEmptyPocket;
-        public InventorySlot[] rucksack = new InventorySlot[20];
-        public int nextEmptyRucksack;
+        private const int maxPocketSlots = 3;
+        private const int maxRucksackSlots = 10;
+        public InventorySlot[] pockets = new InventorySlot[maxPocketSlots];
+        public InventorySlot[] rucksack = new InventorySlot[maxRucksackSlots];
+
+        /// <value>
+        /// Property <c>_nextEmptyPocket</c> points to the next inventory pocket slot that is available.
+        /// </value>
+        private int _nextEmptyPocket;
+        public int NextEmptyPocket
+        {
+            get => _nextEmptyPocket;
+            set
+            {
+                if(value > maxPocketSlots)
+                {
+                    _nextEmptyPocket = maxPocketSlots;
+                }
+                else
+                {
+                     _nextEmptyPocket = value;
+                }
+            }
+        }
+
+        /// <value>
+        /// Property <c>_nextEmptyRucksack</c> points to the next inventory rucksack slot that is available.
+        /// </value>
+        private int _nextEmptyRucksack;
+        public int NextEmptyRucksack
+        {
+            get => _nextEmptyRucksack;
+            set
+            {
+                if (value > maxRucksackSlots)
+                {
+                    _nextEmptyRucksack = maxRucksackSlots;
+                }
+                else
+                {
+                    _nextEmptyRucksack = value;
+                }
+            }
+        }
         public Dictionary<string, Item> items = new Dictionary<string, Item>();
         public Player player;
 
@@ -28,13 +70,13 @@ namespace DungeonExplorer
             {
                 pockets[i] = new InventorySlot();
             }
-            nextEmptyPocket = 1;
+            NextEmptyPocket = 1;
 
             for (int i = 0; i < rucksack.GetLength(0); i++)
             {
                 rucksack[i] = new InventorySlot();
             }
-            nextEmptyRucksack = 1;
+            NextEmptyRucksack = 1;
 
             /* Create a dictionary <items> and initialise
              * every item in the items.xml file. The dictionary stores
@@ -54,17 +96,18 @@ namespace DungeonExplorer
                 {
                     string id = itemElement.Attribute("id").Value;
                     string name = itemElement.Attribute("name").Value;
+                    string description = itemElement.Value.Trim();
                     string type = itemElement.Attribute("type").Value;
                     switch (type)
                     {   
                         case "comfort-toy":
                             string baseBoost = itemElement.Attribute("baseBoost").Value;
-                            Item item = new ComfortToy(id, name, int.Parse(baseBoost));
+                            Item item = new ComfortToy(id, name, description, int.Parse(baseBoost));
                             items.Add(id, item);
                             break;
                         case "card":
                             baseBoost = itemElement.Attribute("baseBoost").Value;
-                            item = new ComfortToy(id, name, int.Parse(baseBoost));
+                            item = new ComfortToy(id, name, description, int.Parse(baseBoost));
                             items.Add(id, item);
                             break;
                         default:
@@ -75,37 +118,41 @@ namespace DungeonExplorer
             }
             else
             {
-                throw new FileNotFoundException("File does not exist...");
+                //throw new FileNotFoundException("File does not exist...");
             }
         }
 
         public void PickupItem(string store, string id, int amount)
-        {
+        {   
             if(store == "pockets")
             {
-                if(nextEmptyPocket == pockets.Length)
+                if(NextEmptyPocket == pockets.Length)
                 {
                     Console.WriteLine("You cannot pick this item up, your pockets are full!");
                 }
                 else
                 {
                     Item item = GetItem(id);
-                    pockets[nextEmptyPocket - 1].ItemStack = new ItemStack(item, amount);
-                    nextEmptyPocket++;
+                    InventorySlot slot = pockets[NextEmptyPocket - 1];
+                    slot.ItemStack = new ItemStack(item, amount);
+                    slot.IsEmpty = false;
+                    NextEmptyPocket++;
                 }
             }
 
             if (store == "rucksack")
             {
-                if (nextEmptyRucksack == rucksack.Length)
+                if (NextEmptyRucksack == rucksack.Length)
                 {
                     Console.WriteLine("You cannot pick this item up, your rucksack is full!");
                 }
                 else
                 {
                     Item item = GetItem(id);
-                    rucksack[nextEmptyRucksack - 1].ItemStack = new ItemStack(item, amount);
-                    nextEmptyRucksack++;
+                    InventorySlot slot = rucksack[NextEmptyRucksack - 1];
+                    slot.ItemStack = new ItemStack(item, amount);
+                    slot.IsEmpty = false;
+                    NextEmptyRucksack++;
                 }
             }
             Console.WriteLine();
@@ -113,6 +160,7 @@ namespace DungeonExplorer
 
         public Item GetItem(string id)
         {
+            Debug.Assert(String.IsNullOrEmpty(id), "The id cannot be null"); // Check that an item id is provided
             Item thisItem;
             try
             {
@@ -158,6 +206,25 @@ namespace DungeonExplorer
             }
             Console.WriteLine(contents.ToString());
             Console.WriteLine();
+        }
+
+        public void CheckPockets()
+        {
+            Game.WriteDialogue("\nYou rummage through your pockets and find:\n");
+            if(NextEmptyPocket == 1)
+            {
+                Console.WriteLine("Your pockets are empty!\n");
+            }
+            else
+            {
+                var contents = new StringBuilder();
+                foreach (var slot in (pockets.Where(s => s.IsEmpty==false)))
+                {
+                    contents.Append($"\nName: {slot.ToString()}\nDescription: \n{slot.GetDescription()}\n");
+                }
+                Console.WriteLine(contents.ToString());
+                Console.WriteLine();
+            }
         }
 
         /// <summary>

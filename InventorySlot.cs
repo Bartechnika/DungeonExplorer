@@ -19,7 +19,20 @@ namespace DungeonExplorer
         public bool IsEmpty;
         public InventorySlot(ItemStack itemStack = null)
         {
-            ItemStack = itemStack ?? new ItemStack(new Empty(), 0);
+            if (itemStack == null)
+            {
+                IsEmpty = true;
+                ItemStack = new ItemStack(new Empty(), 0);
+            }
+            else
+            {
+                ItemStack = itemStack;
+            }
+        }
+
+        public string GetDescription()
+        {
+            return ItemStack.GetDescription();
         }
 
         public override string ToString()

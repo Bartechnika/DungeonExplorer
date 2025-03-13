@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 
 namespace DungeonExplorer
 {   
@@ -15,8 +16,13 @@ namespace DungeonExplorer
         public int Amount { get; set; }
         public ItemStack(Item item, int amount)
         {
-            Item = item;
-            Amount= amount;
+            Item = item ?? throw new ArgumentNullException(nameof(item), "The item cannot be null.");
+            Amount = amount;
+        }
+
+        public string GetDescription()
+        {
+            return Item.GetDescription();
         }
 
         public override string ToString()

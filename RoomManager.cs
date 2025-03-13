@@ -19,7 +19,7 @@ namespace DungeonExplorer
 
         public RoomManager(PlayerManager playerManager)
         {
-            PlayerManager = playerManager;
+            PlayerManager = playerManager ?? throw new ArgumentNullException(nameof(playerManager));
             rooms = new Dictionary<string, Room>();
 
             /* Create a dictionary <rooms> and initialise
@@ -83,8 +83,8 @@ namespace DungeonExplorer
 
             public Interaction(string dialogue, PlayerManager playerManager)
             {
-                this.dialogue = dialogue;
-                this.PlayerManager = playerManager;
+                this.dialogue = dialogue ?? throw new ArgumentNullException(nameof(dialogue));
+                this.PlayerManager = playerManager ?? throw new ArgumentNullException(nameof(playerManager));
             }
             public abstract bool Interact();
         }
@@ -94,7 +94,6 @@ namespace DungeonExplorer
             public Dialogue(string dialogue, PlayerManager playerManager) : base(dialogue, playerManager)
             {
 
-                this.dialogue = dialogue;
             }
 
             public override bool Interact()
@@ -110,7 +109,7 @@ namespace DungeonExplorer
             public Creatures.Creature Creature;
             public BattleDemons(string dialogue, Creatures.Creature creature, PlayerManager playerManager) : base(dialogue, playerManager)
             {
-                Creature = creature;
+                Creature = creature ?? throw new ArgumentNullException(nameof(creature));
             }
 
             public override bool Interact()
@@ -167,7 +166,8 @@ namespace DungeonExplorer
             bool Found;
             public FoundItem(string dialogue, string id, int amount, PlayerManager playerManager) : base(dialogue, playerManager)
             {
-                this.Id = id;
+                this.Id = id ?? throw new ArgumentNullException(nameof(id));
+
                 this.Amount = amount;
                 this.Found = false;
             }

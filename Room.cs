@@ -27,25 +27,34 @@ namespace DungeonExplorer
         public string name;
         public string description;
 
-        // The dialogue to be displayed when the user enters the room (if any)
+        /// <value>
+        /// Property <c>startDialogue</c> is displayed when the user enters the room.
+        /// </value>
         public string startDialogue;
 
-        // The dialogue to be displayed when the user exits the room (if any)
+        /// <value>
+        /// Property <c>exitDialogue</c> is displayed when the user exists the room.
+        /// </value>
         public string exitDialogue;
 
-        // A pointer to the next room to enter when the player exists this room.
+        /// <value>
+        /// Property <c>nextRoom</c> is a pointer to the next room to enter upon leaving the current room.
+        /// </value>
         public string nextRoom;
 
-        // The current location of the player within the room.
+        /// <value>
+        /// Property <c>curLoc</c> stores the current location of the player within the room.
+        /// </value>
         public location curLoc;
 
-        // The location to load when the room is first entered.
+        /// <value>
+        /// Property <c>location</c> is the location to load when the room is first entered.
+        /// </value>
         public location start;
 
-        // A generic location with no purpose other than to leave the room.
-        public location exitLoc;
-
-        // A mapping between locations and their string-identifier.
+        /// <value>
+        /// Property <c>exitLoc</c> maps each location to its string-identifier.
+        /// </value>
         public Dictionary<string, location> locations;
         public PlayerManager ThisPlayerManager;
         public RoomManager ThisRoomManager;
@@ -53,12 +62,10 @@ namespace DungeonExplorer
         public Room(XElement room, PlayerManager playerManager, RoomManager roomManager)
         {
             this.locations = new Dictionary<string, location>();
-            this.exitLoc = new location("exit", this);
-            this.ThisPlayerManager = playerManager;
-            this.ThisRoomManager = roomManager;
+            this.ThisPlayerManager = playerManager ?? throw new ArgumentNullException(nameof(playerManager));
+            this.ThisRoomManager = roomManager ?? throw new ArgumentNullException(nameof(roomManager));
 
             InitialiseRoom(room);
-            ThisRoomManager = roomManager;
         }
 
         /// <summary>
@@ -110,7 +117,7 @@ namespace DungeonExplorer
                         interaction = ThisRoomManager.GetInteraction(interactionElement.Attribute("type").Value, dialogue);
                         break;
                     default:
-                        throw new MissingFieldException("This interaction does not have an attribute corresponding to a defined interaction");
+                        throw new MissingFieldException("This interaction does not have an attribute corresponding to a defined interaction.");
 
                 }
 
@@ -147,32 +154,39 @@ namespace DungeonExplorer
         }
 
         /// <summary>
-        /// 
         /// </summary>
         /// <para>
         /// This class stores all data relating to any location in the game. Every location has an associated interaction
         /// which may be dialogue, a creature battle, an item discovery - or any feature not yet implemented such as puzzles.
         /// </para>
+     
         public class location
         {   
-            public string Name;
+            public string Name { get; set; }
 
-            // Whether the location is currently accessible
-            public string State;
+            // The exit flag for this location
+            public bool exit { get; set; }
 
             // The associated interaction
-            public Interaction interaction;
+            public Interaction interaction { get; set; }
 
             // The room the location is situated in
-            public Room Room;
+            public Room ThisRoom { get; set; }
 
             public Dictionary<string, bool> adjacentLocations;
-
+            private const int numDefaultOptions = 2;
+            
+            /// <summary>
+            /// Constructor <c>location</c> checks if location name or room is null.
+            /// </summary>
+            /// <param name="name"></param>
+            /// <param name="room"></param>
+            /// <exception cref="MissingFieldException"></exception>
             public location(string name, Room room)
-            {   
-                this.Name = name;
-                this.State = "closed";
-                this.Room = room;
+            {
+                this.Name = name ?? throw new ArgumentNullException(nameof(name), "The name cannot be null");
+                this.ThisRoom = room ?? throw new ArgumentNullException(nameof(room), "The room cannot be null");
+                this.exit = false;
                 this.adjacentLocations = new Dictionary<string, bool>();
             }
 
@@ -192,7 +206,13 @@ namespace DungeonExplorer
                     string output = $"{count}. {loc.Key} : {unlocked} ";
                     Console.WriteLine(output);
                 }
-                Console.WriteLine($"{count+1}. Exit" );
+
+                // Additional options available to user in every location:
+
+                // Room Exit : Navigate to the exit location of the room.
+                // Check Pockets : Rummage through pockets and describe each item in detail.
+                Console.WriteLine($"{count+1}. Rummage through pockets");
+                Console.WriteLine($"{count+2}. Exit" );
             }
 
             public bool TriggerInteraction()
@@ -202,19 +222,23 @@ namespace DungeonExplorer
 
             public location Navigate()
             {
-                string[] options = new string[adjacentLocations.Count+1];
+                string[] options = new string[adjacentLocations.Count+numDefaultOptions];
                 for (int i = 0; i < options.Length; i++)
                 {
                     options[i] = (i+1).ToString();
                 }
                 GetAdjacentLocations();
-                int sel = int.Parse(Game.ValidateInputSelection("\nContinue to (1, 2...): ", options));
+                int sel = int.Parse(Game.ValidateInputSelection("Please select (1, 2...): ", options));
 
-                location loc;
-                if (sel == adjacentLocations.Count + 1)
-                    loc = Room.exitLoc;
+                location loc = ThisRoom.curLoc;
+
+                // Handle default options
+                if (sel == adjacentLocations.Count + 1) // Case Check Pockets
+                    ThisRoom.ThisPlayerManager.CheckPockets();
+                else if (sel == adjacentLocations.Count + 2) // Case Exit
+                    exit = true;
                 else
-                    loc = (Room.locations[adjacentLocations.Keys.ToArray()[sel - 1]]);
+                    loc = (ThisRoom.locations[adjacentLocations.Keys.ToArray()[sel - 1]]);
 
                 return loc;
 
@@ -233,6 +257,8 @@ namespace DungeonExplorer
             string locArt = "";
 
             bool exit = false;
+            bool changeLoc = false;
+            location nextLoc;
             while (!exit)
             {
                 ThisPlayerManager.CalculateBoost();
@@ -241,15 +267,30 @@ namespace DungeonExplorer
                 Console.WriteLine(locArt);
 
                 exit = curLoc.TriggerInteraction();
-                if(exit)
+                if (exit)
                 {
                     break;
                 }
 
-                curLoc = curLoc.Navigate();
-                if(curLoc == exitLoc)
+                // Default actions incl. CheckPockets() can be performed multiple times in a single location
+                // until the user selects the option of changing location, in which case the loop is terminated.
+                changeLoc = false;
+                while (!changeLoc)
                 {
-                    break;
+                    nextLoc = curLoc.Navigate();
+                    
+                    // Check if the player wants to exit the current room but current location is not changed as a result.
+                    if (nextLoc.exit == true)
+                    {
+                        exit = true;
+                        changeLoc = true;
+                        break;
+                    }
+                    if (nextLoc != curLoc || nextLoc.exit == true)
+                    {
+                        curLoc = nextLoc;
+                        changeLoc = true;
+                    }
                 }
             }
 
@@ -260,6 +301,11 @@ namespace DungeonExplorer
         {
             Console.WriteLine("");
             Game.WriteDialogue(exitDialogue);   
+        }
+
+        public override string ToString()
+        {
+            return description;
         }
     }
 }

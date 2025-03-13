@@ -6,6 +6,7 @@ using System.Net.NetworkInformation;
 using System.Security.Policy;
 using DungeonExplorer;
 using static System.Net.Mime.MediaTypeNames;
+using static DungeonExplorer.RoomManager;
 
 namespace DungeonExplorer
 {
@@ -61,11 +62,11 @@ namespace DungeonExplorer
                 Possessives = possessives;
 
                 if (subjects.Length == 0)
-                    Subjects = new string[] { "404" };
+                    Subjects = new string[] { "they" };
                 if (objects.Length == 0)
-                    Objects = new string[] { "404" };
+                    Objects = new string[] { "their" };
                 if (possessives.Length == 0)
-                    Possessives = new string[] { "404" };
+                    Possessives = new string[] { "them" };
             }
         }
 
@@ -103,7 +104,7 @@ namespace DungeonExplorer
         /// </remarks>
         public void SetName()
         {
-            string name = "0";
+            string name = "";
             bool validName = false;
             while (!validName)
             {
@@ -112,7 +113,7 @@ namespace DungeonExplorer
                 if (name.Length < 1 || name.Length > 30)
                     Console.WriteLine("Name must be between 1 and 30 characters long.");
                 else if (!name.All(char.IsLetter))
-                    Console.WriteLine("Name must not contain digits: only letters of English alphabet.");
+                    Console.WriteLine("Name must not contain digits: only Unicode letters.");
                 else
                     validName = true;
             }
@@ -140,8 +141,8 @@ namespace DungeonExplorer
             {
                 if (addSubject)
                 {
-                    next = Game.ValidateInputSelection("Would you like to add another subject pronoun? Y/N ");
-                    if (next == "N")
+                    next = Game.ValidateInputSelection("Would you like to add another subject pronoun? Enter (Y/N) ");
+                    if (next == "n")
                         addSubject = false;
                     else
                     {
@@ -152,8 +153,8 @@ namespace DungeonExplorer
 
                 if(addObject)
                 {
-                    next = Game.ValidateInputSelection("Would you like to add another object pronoun? Y/N ");
-                    if (next == "N")
+                    next = Game.ValidateInputSelection("Would you like to add another object pronoun? Enter (Y/N) ");
+                    if (next == "n")
                     {
                         addObject = false;
                     }
@@ -166,8 +167,8 @@ namespace DungeonExplorer
 
                 if (addPossessive)
                 {
-                    next = Game.ValidateInputSelection("Would you like to add another possessive pronoun? Y/N ");
-                    if (next == "N")
+                    next = Game.ValidateInputSelection("Would you like to add another possessive pronoun? Enter (Y/N) ");
+                    if (next == "n")
                     {
                         addPossessive = false;
                     }
@@ -189,6 +190,7 @@ namespace DungeonExplorer
         {
             public string Name { get; private set; }
             public Player player;
+
             private int _value;
 
             public int Value
@@ -206,8 +208,9 @@ namespace DungeonExplorer
             public int Boost;
 
             public PlayerAttribute(string name, int value)
-            {
-                Name = name;
+            {   
+                // Use of guard clause
+                Name = name ?? throw new ArgumentNullException(nameof(name), "The name cannot be null.");
                 Value = value;
             } 
         }

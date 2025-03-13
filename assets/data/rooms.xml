@@ -102,8 +102,8 @@
 			</interaction>
 		</location>
 		<exit>
-			You hastily leave the room, tap still running.
+			You get back in the car after a long day.
 		</exit>
-		<next>bathroom</next>
+		<next>car</next>
 	</train-platform>
 </Rooms>

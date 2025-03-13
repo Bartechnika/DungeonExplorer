@@ -14,6 +14,7 @@ using System.Runtime.ConstrainedExecution;
 using System.Collections;
 using System.Linq;
 using System.CodeDom;
+using System.Diagnostics;
 
 namespace DungeonExplorer
 {
@@ -58,6 +59,7 @@ namespace DungeonExplorer
         public static string GetArt(string file)
         {   
             string path = artDir + file + ".txt";
+            Debug.Assert(File.Exists(path)); // check if the art file exists
             if (File.Exists(path))
             {
                 return File.ReadAllText(path);
@@ -168,13 +170,17 @@ namespace DungeonExplorer
         {   
             // If the optional parameter "options" is not defined in the function call
             // it defaults to provide the player with a yes/no choice.
-            options = options ?? new string[] {"Y", "N"};
+            options = options ?? new string[] {"y", "n"};
+
+            // Options menu is automatically converted to lowercase using LINQ expression
+            options = options.Select(s => s.ToLower()).ToArray();
+
             string sel = "";
             bool validInput = false;
             while (!validInput)
             {
                 Console.Write(message);
-                sel = Console.ReadLine();
+                sel = Console.ReadLine().ToLower();
                 if (Array.IndexOf(options, sel) > -1)
                     validInput = true;
                 else

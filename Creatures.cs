@@ -48,11 +48,12 @@ namespace DungeonExplorer
 
             public Creature(string name, string dialogue, int overwhelmFactor, PlayerManager playerManager)
             {
-                this.Name = name;
-                this.Dialogue = dialogue;
+                this.Name = name ?? throw new ArgumentNullException(nameof(name), "The name cannot be null.");
+                this.Dialogue = dialogue ?? throw new ArgumentNullException(nameof(dialogue), "The dialogue cannot be null.");
+                this.PlayerManager = playerManager ?? throw new ArgumentNullException(nameof(dialogue), "The PlayerManager cannot be null.");
+
                 this.OverwhelmFactor = overwhelmFactor;
                 this.defeated = false;
-                this.PlayerManager = playerManager;
             }
 
             public void Attack()
