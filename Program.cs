@@ -11,7 +11,7 @@ namespace DungeonExplorer
 {   
     public class Program
     {
-        private const bool test = true;
+        private const bool test = false;
         static void Main(string[] args)
         {   
             if(test)

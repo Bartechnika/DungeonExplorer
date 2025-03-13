@@ -149,7 +149,7 @@ namespace DungeonExplorer
                 {
                     foreach (char c in s)
                     {
-                        //System.Threading.Thread.Sleep(charDelay);
+                        System.Threading.Thread.Sleep(charDelay);
                         Console.Write(c);
                     }
                     Console.Write('\n');
