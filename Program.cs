@@ -11,13 +11,22 @@ namespace DungeonExplorer
 {   
     public class Program
     {
+        private const bool test = true;
         static void Main(string[] args)
-        {
-            Game game = new Game();
-            game.Start();
-            Console.WriteLine("Waiting for your Implementation");
-            Console.WriteLine("Press any key to exit...");
-            Console.ReadKey();
+        {   
+            if(test)
+            {
+                Testing testing = new Testing();
+                testing.UnitTest_1();
+            }
+            else
+            {
+                Game game = new Game();
+                game.Start();
+                Console.WriteLine("Waiting for your Implementation");
+                Console.WriteLine("Press any key to exit...");
+                Console.ReadKey();
+            }
         }
     }
 }

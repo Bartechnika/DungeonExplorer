@@ -160,7 +160,7 @@ namespace DungeonExplorer
 
         public Item GetItem(string id)
         {
-            Debug.Assert(String.IsNullOrEmpty(id), "The id cannot be null"); // Check that an item id is provided
+            //Debug.Assert(String.IsNullOrEmpty(id), "The id cannot be null"); // Check that an item id is provided
             Item thisItem;
             try
             {
