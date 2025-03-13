@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Rooms>
+	<bathroom>
+		<name>
+			Bathroom
+		</name>
+		<description>
+			A small bathroom with a shower to the left. 
+			Toiletries sat idling in cups stacked along the window sill.
+		</description>
+		<start>
+			You trudge into the bathroom half-awake and make your way to the cabinet.
+		</start>
+		<location name="bathroom-mirror" adj="sink:true">
+			<interaction type="mirror">
+				*you stare at yourself in the shiny mirror under good lighting*
+				Tip: you can only see your stats when looking into a reflective surface.
+			</interaction>
+		</location>
+		<location name="cabinet" adj="sink:true,bathroom-door:false">
+			<interaction type="dialogue">*you reach out to grab your toothbrush*</interaction>
+		</location>
+		<location name="sink" adj="bathroom-door:false">
+			<interaction type="battle-demons">
+				<creature name="Water Conjuror" type="sensory-creature" of="1">
+					Fighting increases your resilience - you can't flee forever.
+				</creature>
+			</interaction>
+		</location>
+		<location name="bathroom-door" adj="sink:true">
+			<interaction type="dialogue">you turn to leave</interaction>
+		</location>
+		<exit>
+			You hastily leave the room, tap still running.
+		</exit>
+		<next>bedroom</next>
+	</bathroom>
+	<bedroom>
+		<name>
+			Your bedroom
+		</name>
+		<description>
+			Your safe place - nothing can hurt you here. Equipped with beautiful hanging lights and posters from your favourite Anime.
+		</description>
+		<start>
+			Time to get sorted for the day.
+		</start>
+		<location name="hook" adj="door:true">
+			<interaction type="found-item">
+				<item id="0" amount="1">
+					you take your rucksack off the hook and remember to pocket your ID card.
+				</item>
+			</interaction>
+		</location>
+		<location name="door" adj="hook:true">
+			<interaction type="dialogue">cya later room :) OH i forgot to turn off my lights...</interaction>
+		</location>
+		<exit>
+			all ready for the day.
+		</exit>
+		<next>car</next>
+	</bedroom>
+	<car>
+		<name>
+			Car journey
+		</name>
+		<description>
+			A leisurely ride the train station through the apocalyptic utopia of Autodale. 
+		</description>
+		<start>
+			you hop in the passenger seat, rucksack in hand.
+		</start>
+		<location name="seat" adj="turn-around:true">
+			<interaction type="dialogue">*road works again?*</interaction>
+		</location>
+		<location name="turn-around" adj="seat:true">
+			<interaction type="found-item">
+				<item id="1" amount="1">you look behind you to see Octopus sitting lonely on the backseat</item>
+			</interaction>
+		</location>
+		<exit>
+			See you later! x
+		</exit>
+		<next>train-platform</next>
+	</car>
+	<train-platform>
+		<name>
+			Train platform
+		</name>
+		<description>
+			A small train platform in a local village commonly frequented by college students.
+		</description>
+		<start>
+			I arrived early enough - right?
+		</start>
+		<location name="entrance" adj="platform:true" intro="Welcome to Hawkins Station.">
+			<interaction type="dialogue">*you look at the train times to your left*</interaction>
+		</location>
+		<location name="platform" adj="entrance:true" intro="Waaaah waaaah waaaaah!!! TOOT TOOT">
+			<interaction type="found-item">
+				<item id="2" amount="1">you look at the bus stop pole and see a sticker</item>
+			</interaction>
+		</location>
+		<exit>
+			You get back in the car after a long day.
+		</exit>
+		<next>car</next>
+	</train-platform>
+</Rooms>
