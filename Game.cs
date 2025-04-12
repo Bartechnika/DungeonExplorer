@@ -1,20 +1,11 @@
 ﻿using System;
-using System.Media;
 using System.IO;
 using System.Collections.Generic;
-using System.Diagnostics.SymbolStore;
-using System.ComponentModel;
-using System.Threading;
-using System.Xml;
-using System.Globalization;
 using System.Xml.Linq;
-using static System.Net.Mime.MediaTypeNames;
-using System.Text.RegularExpressions;
-using System.Runtime.ConstrainedExecution;
-using System.Collections;
 using System.Linq;
-using System.CodeDom;
 using System.Diagnostics;
+using System.Xml.Schema;
+using System.ComponentModel;
 
 namespace DungeonExplorer
 {
@@ -25,6 +16,10 @@ namespace DungeonExplorer
         public string curDir { get; set; }
         public static string artDir { get; set; }
         public static string textDir {  get; set; }
+
+        // Interaction elements
+        public static Dictionary<Id, Item> Items;
+        public static Dictionary<Id, Monster> Monsters;
         public Game()
         {
             // Initialise directory variables
@@ -35,6 +30,9 @@ namespace DungeonExplorer
 
             // Initialize the game with one room and one player
             playerManager = new PlayerManager();
+
+            Items = XMLManager.GetItemXML(playerManager);
+            Monsters = XMLManager.GetMonsterXML(playerManager);
         }
 
         /* --- Utility Functions ---
@@ -81,7 +79,11 @@ namespace DungeonExplorer
         /// </returns>
         public static string PopulateField(string art, string field, string para)
         {
-            para = para + new string(' ', field.Length - para.Length);
+            if(para.Length  > field.Length)
+            {
+                throw new ArgumentOutOfRangeException("Parameter must be less than or equal to length of field to occupy.");
+            }
+            para += new string(' ', field.Length - para.Length);
             return art.Replace(field, para);
         }
         
@@ -105,7 +107,7 @@ namespace DungeonExplorer
                 }
                 catch
                 {
-                    throw new NullReferenceException("Either dialogue does not exist or is not properly formatted");
+                    throw new NullReferenceException("Either dialogue does not exist or is not properly formatted.");
                 }
             }
             else
@@ -215,7 +217,6 @@ namespace DungeonExplorer
 
             // For debugging purposes, the first menu option "~ hit bed ~" will run when either 1,2 or 3 is entered by the user.
             InitialiseGame();
-            //GameLoop();
         }
 
         private void InitialiseGame()
@@ -273,7 +274,7 @@ namespace DungeonExplorer
 
         private void GameLoop()
         {
-            RoomManager roomManager = new RoomManager(playerManager);
+            GameMap roomManager = new GameMap(playerManager);
 
             bool playing = true;
             while (playing)

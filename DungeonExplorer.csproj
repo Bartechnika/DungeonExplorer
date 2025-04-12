@@ -43,8 +43,14 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Creatures.cs" />
+    <Compile Include="CreatureAttribute.cs" />
+    <Compile Include="Creature.cs" />
+    <Compile Include="Id.cs" />
+    <Compile Include="Interactions.cs" />
+    <Compile Include="Location.cs" />
+    <Compile Include="Monsters.cs" />
     <Compile Include="Game.cs" />
+    <Compile Include="Inventory.cs" />
     <Compile Include="PlayerManager.cs" />
     <Compile Include="InventorySlot.cs" />
     <Compile Include="Item.cs" />
@@ -53,8 +59,9 @@
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Room.cs" />
-    <Compile Include="RoomManager.cs" />
+    <Compile Include="GameMap.cs" />
     <Compile Include="Testing.cs" />
+    <Compile Include="XMLManager.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

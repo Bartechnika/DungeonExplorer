@@ -1,5 +1,26 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Rooms>
+	<room>
+		<name>
+			Room-Name
+		</name>
+		<description>
+			This is an example room.
+		</description>
+		<entranceDialogue>
+			You enter the example room.
+		</entranceDialogue>
+		<exitDialogue>
+			You leave the example room.
+		</exitDialogue>
+		<interaction type="found-item">
+			<dialogue>The dialogue for this example interaction.</dialogue>
+			<item name="" id="#0001"></item>
+			<fight name="" id="#0001"></fight>
+		</interaction>
+	</room>
+	
+
 	<bathroom>
 		<name>
 			Bathroom
@@ -8,9 +29,9 @@
 			A small bathroom with a shower to the left. 
 			Toiletries sat idling in cups stacked along the window sill.
 		</description>
-		<start>
+		<entranceDialogue>
 			You trudge into the bathroom half-awake and make your way to the cabinet.
-		</start>
+		</entranceDialogue>
 		<location name="bathroom-mirror" adj="sink:true">
 			<interaction type="mirror">
 				*you stare at yourself in the shiny mirror under good lighting*
@@ -30,11 +51,12 @@
 		<location name="bathroom-door" adj="sink:true">
 			<interaction type="dialogue">you turn to leave</interaction>
 		</location>
-		<exit>
+		<exitDialogue>
 			You hastily leave the room, tap still running.
-		</exit>
+		</exitDialogue>
 		<next>bedroom</next>
 	</bathroom>
+	
 	<bedroom>
 		<name>
 			Your bedroom
@@ -42,9 +64,9 @@
 		<description>
 			Your safe place - nothing can hurt you here. Equipped with beautiful hanging lights and posters from your favourite Anime.
 		</description>
-		<start>
+		<entranceDialogue>
 			Time to get sorted for the day.
-		</start>
+		</entranceDialogue>
 		<location name="hook" adj="door:true">
 			<interaction type="found-item">
 				<item id="0" amount="1">
@@ -55,11 +77,12 @@
 		<location name="door" adj="hook:true">
 			<interaction type="dialogue">cya later room :) OH i forgot to turn off my lights...</interaction>
 		</location>
-		<exit>
+		<exitDialogue>
 			all ready for the day.
-		</exit>
+		</exitDialogue>
 		<next>car</next>
 	</bedroom>
+	
 	<car>
 		<name>
 			Car journey
@@ -67,9 +90,9 @@
 		<description>
 			A leisurely ride the train station through the apocalyptic utopia of Autodale. 
 		</description>
-		<start>
+		<entranceDialogue>
 			you hop in the passenger seat, rucksack in hand.
-		</start>
+		</entranceDialogue>
 		<location name="seat" adj="turn-around:true">
 			<interaction type="dialogue">*road works again?*</interaction>
 		</location>
@@ -78,11 +101,12 @@
 				<item id="1" amount="1">you look behind you to see Octopus sitting lonely on the backseat</item>
 			</interaction>
 		</location>
-		<exit>
+		<exitDialogue>
 			See you later! x
-		</exit>
+		</exitDialogue>
 		<next>train-platform</next>
 	</car>
+	
 	<train-platform>
 		<name>
 			Train platform
@@ -90,9 +114,9 @@
 		<description>
 			A small train platform in a local village commonly frequented by college students.
 		</description>
-		<start>
+		<entranceDialogue>
 			I arrived early enough - right?
-		</start>
+		</entranceDialogue>
 		<location name="entrance" adj="platform:true" intro="Welcome to Hawkins Station.">
 			<interaction type="dialogue">*you look at the train times to your left*</interaction>
 		</location>
@@ -101,9 +125,10 @@
 				<item id="2" amount="1">you look at the bus stop pole and see a sticker</item>
 			</interaction>
 		</location>
-		<exit>
+		<exitDialogue>
 			You get back in the car after a long day.
-		</exit>
+		</exitDialogue>
 		<next>car</next>
 	</train-platform>
+	
 </Rooms>

@@ -14,69 +14,15 @@ using System.Xml.Linq;
 namespace DungeonExplorer
 {
     public class PlayerManager
-    {
-        private const int maxPocketSlots = 3;
-        private const int maxRucksackSlots = 10;
-        public InventorySlot[] pockets = new InventorySlot[maxPocketSlots];
-        public InventorySlot[] rucksack = new InventorySlot[maxRucksackSlots];
+    {   
 
-        /// <value>
-        /// Property <c>_nextEmptyPocket</c> points to the next inventory pocket slot that is available.
-        /// </value>
-        private int _nextEmptyPocket;
-        public int NextEmptyPocket
-        {
-            get => _nextEmptyPocket;
-            set
-            {
-                if(value > maxPocketSlots)
-                {
-                    _nextEmptyPocket = maxPocketSlots;
-                }
-                else
-                {
-                     _nextEmptyPocket = value;
-                }
-            }
-        }
-
-        /// <value>
-        /// Property <c>_nextEmptyRucksack</c> points to the next inventory rucksack slot that is available.
-        /// </value>
-        private int _nextEmptyRucksack;
-        public int NextEmptyRucksack
-        {
-            get => _nextEmptyRucksack;
-            set
-            {
-                if (value > maxRucksackSlots)
-                {
-                    _nextEmptyRucksack = maxRucksackSlots;
-                }
-                else
-                {
-                    _nextEmptyRucksack = value;
-                }
-            }
-        }
         public Dictionary<string, Item> items = new Dictionary<string, Item>();
         public Player player;
+        readonly Inventory inventory;
 
         public PlayerManager()
         {
             player = new Player();
-
-            for (int i = 0; i < pockets.GetLength(0); i++)
-            {
-                pockets[i] = new InventorySlot();
-            }
-            NextEmptyPocket = 1;
-
-            for (int i = 0; i < rucksack.GetLength(0); i++)
-            {
-                rucksack[i] = new InventorySlot();
-            }
-            NextEmptyRucksack = 1;
 
             /* Create a dictionary <items> and initialise
              * every item in the items.xml file. The dictionary stores
@@ -102,12 +48,12 @@ namespace DungeonExplorer
                     {   
                         case "comfort-toy":
                             string baseBoost = itemElement.Attribute("baseBoost").Value;
-                            Item item = new ComfortToy(id, name, description, int.Parse(baseBoost));
+                            Item item = new ComfortToy(id, name, description);
                             items.Add(id, item);
                             break;
                         case "card":
                             baseBoost = itemElement.Attribute("baseBoost").Value;
-                            item = new ComfortToy(id, name, description, int.Parse(baseBoost));
+                            item = new ComfortToy(id, name, description);
                             items.Add(id, item);
                             break;
                         default:
@@ -122,40 +68,9 @@ namespace DungeonExplorer
             }
         }
 
-        public void PickupItem(string store, string id, int amount)
-        {   
-            if(store == "pockets")
-            {
-                if(NextEmptyPocket == pockets.Length)
-                {
-                    Console.WriteLine("You cannot pick this item up, your pockets are full!");
-                }
-                else
-                {
-                    Item item = GetItem(id);
-                    InventorySlot slot = pockets[NextEmptyPocket - 1];
-                    slot.ItemStack = new ItemStack(item, amount);
-                    slot.IsEmpty = false;
-                    NextEmptyPocket++;
-                }
-            }
-
-            if (store == "rucksack")
-            {
-                if (NextEmptyRucksack == rucksack.Length)
-                {
-                    Console.WriteLine("You cannot pick this item up, your rucksack is full!");
-                }
-                else
-                {
-                    Item item = GetItem(id);
-                    InventorySlot slot = rucksack[NextEmptyRucksack - 1];
-                    slot.ItemStack = new ItemStack(item, amount);
-                    slot.IsEmpty = false;
-                    NextEmptyRucksack++;
-                }
-            }
-            Console.WriteLine();
+        public void PickupItem(string store, Item item, int amount)
+        {
+            inventory.StoreItem(store, item, amount);
         }
 
         public Item GetItem(string id)
@@ -174,17 +89,6 @@ namespace DungeonExplorer
             return items[id];
         }
 
-        public void CalculateBoost()
-        {
-            int boost = 0;
-            foreach(InventorySlot slot in pockets)
-            {
-                boost += slot.ItemStack.Item.BaseBoost;
-            }
-
-            player.Resilience.Value = boost;
-        }
-
         public void TakeDamage(int overwhelmFactor)
         {
             player.Energy.Value -= overwhelmFactor;
@@ -197,34 +101,17 @@ namespace DungeonExplorer
 
         public void InventoryContents()
         {
-            string art = Game.GetArt("pockets");
-            Console.WriteLine(art);
-            var contents = new StringBuilder();
-            foreach (var slot in pockets)
-            {
-                contents.Append(slot.ToString() + " ");
-            }
-            Console.WriteLine(contents.ToString());
-            Console.WriteLine();
+            inventory.InventoryContents();
         }
 
         public void CheckPockets()
         {
-            Game.WriteDialogue("\nYou rummage through your pockets and find:\n");
-            if(NextEmptyPocket == 1)
-            {
-                Console.WriteLine("Your pockets are empty!\n");
-            }
-            else
-            {
-                var contents = new StringBuilder();
-                foreach (var slot in (pockets.Where(s => s.IsEmpty==false)))
-                {
-                    contents.Append($"\nName: {slot.ToString()}\nDescription: \n{slot.GetDescription()}\n");
-                }
-                Console.WriteLine(contents.ToString());
-                Console.WriteLine();
-            }
+            inventory.CheckPockets();
+        }
+
+        public void CheckRucksack()
+        {
+            inventory.CheckRucksack();
         }
 
         /// <summary>

@@ -15,7 +15,7 @@ namespace DungeonExplorer
         /// Property <c>id</c> is a string identifier of numerical chars that
         /// uniquely represents every Item type.
         /// </value>
-        public string Id { get; private set; }
+        public Id ItemId { get; private set; }
 
         /// <value>
         /// Property <c>name</c> is a string identifier displayed to the player
@@ -24,23 +24,16 @@ namespace DungeonExplorer
         public string Name {  get; private set; }
 
         /// <value>
-        /// Property <c>BaseBoost</c> represents the boost given to the player's
-        /// resilience.
+        /// Property <c>description</c> is a brief statement explaining what the item is.
         /// </value>
         public string Description { get; private set; }
 
-        /// <value>
-        /// Property <c>BaseBoost</c> represents the boost given to the player's
-        /// resilience.
-        /// </value>
-        public int BaseBoost { get; private set; }
-
-        public Item(string id, string name, string description, int baseBoost=0)
+        public Item(string id, string name, string description)
         {
-            this.Id = id ?? throw new ArgumentNullException(nameof(id), "The id cannot be null.");
-            this.Name = name ?? throw new ArgumentNullException(nameof(name), "The name cannot be null.");
-            this.Description = description ?? throw new ArgumentNullException(nameof(name), "The description cannot be null.");
-            this.BaseBoost = baseBoost;
+            Console.WriteLine(id);
+            ItemId.Val = id ?? throw new ArgumentNullException(nameof(id), "The id cannot be null.");
+            Name = name ?? throw new ArgumentNullException(nameof(name), "The name cannot be null.");
+            Description = description ?? throw new ArgumentNullException(nameof(name), "The description cannot be null.");
         }
 
         public string GetDescription()
@@ -60,7 +53,7 @@ namespace DungeonExplorer
     /// </summary>
     public class Empty : Item
     {
-        public Empty(string id="-1", string name = "empty", string description="empty-inventory-slot", int baseBoost = 0) : base(id, name, description, baseBoost)
+        public Empty(string id="-1", string name = "empty", string description="empty-inventory-slot") : base(id, name, description)
         {
 
         }
@@ -72,7 +65,7 @@ namespace DungeonExplorer
     /// </summary>
     public class Card : Item
     {
-        public Card(string id, string name, string description = "empty-inventory-slot", int baseBoost=0) : base(id, name, description, baseBoost)
+        public Card(string id, string name, string description = "empty-inventory-slot") : base(id, name, description)
         {
 
         }
@@ -84,7 +77,7 @@ namespace DungeonExplorer
     /// </summary>
     public class ComfortToy : Item
     {
-        public ComfortToy(string id, string name, string description = "empty-inventory-slot", int baseBoost=0) : base(id, name, description, baseBoost)
+        public ComfortToy(string id, string name, string description = "empty-inventory-slot") : base(id, name, description)
         { 
             
         }

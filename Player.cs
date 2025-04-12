@@ -6,14 +6,12 @@ using System.Net.NetworkInformation;
 using System.Security.Policy;
 using DungeonExplorer;
 using static System.Net.Mime.MediaTypeNames;
-using static DungeonExplorer.RoomManager;
+using static DungeonExplorer.GameMap;
 
 namespace DungeonExplorer
 {
-    public class Player
+    public class Player : Creature
     {
-        public string Name { get; private set; }
-
         /// <summary>
         /// Struct <c>pronouns</c> allows the user to set any number of subject, object and possessive pronouns.
         /// </summary>
@@ -72,28 +70,26 @@ namespace DungeonExplorer
 
         public pronouns myPronouns;
 
-        public PlayerManager playerManager;
-
         /// <value>
-        /// Property <c>Resilience</c> is a measure of the player's to persevere in the face of difficulty. 
+        /// Property <c>Resilience</c> is a measure of the player's ability to persevere in the face of difficulty. 
         /// </value>
-        public PlayerAttribute Resilience;
+        public CreatureAttribute Resilience;
 
         /// <value>
         /// Property <c>Imagination</c> is a measure of the player's ability to think outside the box.
         /// </value>
-        public PlayerAttribute Imagination;
+        public CreatureAttribute Imagination;
 
         /// <value>
         /// Property <c>Energy</c> is a measure of how much more of this the player can take.
         /// </value>
-        public PlayerAttribute Energy;
+        public CreatureAttribute Energy;
 
         public Player()
         {
-            Resilience = new PlayerAttribute("Resilience", 0);
-            Imagination = new PlayerAttribute("Imagination", 0);
-            Energy = new PlayerAttribute("Energy", 0);
+            Resilience = new CreatureAttribute("Resilience", 0);
+            Imagination = new CreatureAttribute("Imagination", 0);
+            Energy = new CreatureAttribute("Energy", 0);
         }
 
         /// <summary>
@@ -181,38 +177,6 @@ namespace DungeonExplorer
             }
 
             myPronouns = new pronouns(Subjects.ToArray(), Objects.ToArray(), Possessives.ToArray());
-        }
-
-        /// <summary>
-        /// Class <c>PlayerAttribute</c> represents an attribute of the player.
-        /// </summary>
-        public class PlayerAttribute
-        {
-            public string Name { get; private set; }
-            public Player player;
-
-            private int _value;
-
-            public int Value
-            {
-                get => _value;
-                set
-                {
-                    _value = value;
-                    if (value < 0 || value > 100)
-                    {
-                        _value = 0;
-                    }
-                }
-            }
-            public int Boost;
-
-            public PlayerAttribute(string name, int value)
-            {   
-                // Use of guard clause
-                Name = name ?? throw new ArgumentNullException(nameof(name), "The name cannot be null.");
-                Value = value;
-            } 
         }
 
         /// <summary>

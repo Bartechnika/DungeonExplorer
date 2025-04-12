@@ -16,7 +16,7 @@ namespace DungeonExplorer
     public class InventorySlot
     {
         public ItemStack ItemStack;
-        public bool IsEmpty;
+        public bool IsEmpty { get; set; }
         public InventorySlot(ItemStack itemStack = null)
         {
             if (itemStack == null)
