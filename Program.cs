@@ -13,7 +13,8 @@ namespace DungeonExplorer
     {
         private const bool test = false;
         static void Main(string[] args)
-        {   
+        {
+            Console.ForegroundColor = ConsoleColor.Green;
             if(test)
             {
                 Testing testing = new Testing();

@@ -52,21 +52,21 @@ namespace DungeonExplorer
             }
         }
 
-        public static Interaction GetInteraction(string type, string dialogue, PlayerManager playerManager, Id itemId=new Id(), int amount=0, Id monsterId=new Id())
+        public static Interaction GetInteraction(string name, string type, string dialogue, PlayerManager playerManager, Id itemId, int amount, Id monsterId, string monsterName, int of)
         {
             switch (type)
             {
                 case "dialogue":
-                    return new Dialogue(dialogue, playerManager);
+                    return new Dialogue(name, dialogue, playerManager);
                 case "found-item":
-                    return new FoundItem(dialogue, playerManager, itemId, amount);
+                    return new FoundItem(name, dialogue, playerManager, itemId, amount);
                 case "fight-monster":
-                    return new FightMonster(dialogue, playerManager, monsterId);
+                    return new FightMonster(name, dialogue, playerManager, monsterId, monsterName, of);
                 case "mirror":
-                    return new Mirror(dialogue, playerManager);
+                    return new Mirror(name, dialogue, playerManager);
             }
 
-            return new Dialogue("null", playerManager);
+            return new Dialogue(name, "null", playerManager);
         }
     }
 }

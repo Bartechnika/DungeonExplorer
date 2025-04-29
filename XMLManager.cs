@@ -41,6 +41,7 @@ namespace DungeonExplorer
             foreach (XElement roomXElement in roomXElements)
             {
                 Room room = ParseRoomXML(roomXElement, playerManager);
+                rooms.Add(roomXElement.Name.ToString(), room);
             }
 
             return rooms;
@@ -68,6 +69,12 @@ namespace DungeonExplorer
             }
 
             Room room = new Room(name, description, entraceDialogue, exitDialogue, nextRoom, locations, playerManager);
+
+            foreach(var locX in locations.Values.ToArray())
+            {
+                locX.ThisRoom = room;
+            }
+
             return room;
         }
 
@@ -75,34 +82,51 @@ namespace DungeonExplorer
         {
             // For the location
             string name = locX.Attribute("name").Value.ToString();
+            string description = locX.Element("description").Value.ToString();
+            string dialogue = locX.Element("dialogue").Value.ToString();
 
-            // For the interaction
-            XElement interactionX = locX.Element("interaction");
-            string interactType = interactionX.Attribute("type").Value.ToString();
-
-            // For the dialogue
-            string interactDialogue = interactionX.Element("dialogue").Value.ToString();
-
-            // For the item
-            XElement interactItem = interactionX.Element("item");
-            string itemName = interactItem.Attribute("name").Value.ToString();
-            int amount = int.Parse(interactItem.Attribute("amount").Value.ToString());
-            Id itemId = new Id();
-            itemId.Val = interactItem.Attribute("id").Value.ToString();
-
-            // For monster
-            XElement interactMonster = interactionX.Element("monster");
-            string monsterName = interactMonster.Attribute("name").Value.ToString();
-            Id monsterId = new Id();
-            itemId.Val = interactItem.Attribute("id").Value.ToString();
-
-            Interaction interaction = GameMap.GetInteraction(interactType, interactDialogue, playerManager, itemId, amount, monsterId);
-
-            location loc = new location(name);
-            loc.interaction = interaction;
+            location loc = new location(name, description, dialogue);
+            loc.interactions = ParseInteractionXML(locX, playerManager);
             loc.adjacentLocations = ParseAdjacentLocations(locX);
 
             return loc;
+        }
+
+        public static List<Interaction> ParseInteractionXML(XElement locX, PlayerManager playerManager)
+        {
+            List<Interaction> interactions = new List<Interaction>();
+            Interaction interaction;
+            var interactionsList = locX.Elements("interaction");
+            foreach(var interactionX in interactionsList)
+            {
+                string interactName = interactionX.Attribute("name").Value.ToString();
+                string interactType = interactionX.Attribute("type").Value.ToString();
+
+                // For the dialogue
+                string interactDialogue = interactionX.Element("dialogue").Value.ToString();
+
+                // For the item
+                XElement interactItem = interactionX.Element("item");
+                string itemName = interactItem.Attribute("name").Value.ToString();
+                string amount = interactItem.Attribute("amount").Value.ToString();
+                int itemAmount = 0;
+                if (amount != "") { itemAmount = int.Parse(amount); }
+
+                Id itemId = new Id(interactItem.Attribute("id").Value.ToString());
+
+                // For monster
+                XElement interactMonster = interactionX.Element("monster");
+                string monsterName = interactMonster.Attribute("name").Value.ToString();
+                string of = interactMonster.Attribute("of").Value.ToString();
+                int monsterOf = 0;
+                if (of != "") { monsterOf = int.Parse(of); }
+                Id monsterId = new Id(interactMonster.Attribute("id").Value.ToString());
+
+                interaction = GameMap.GetInteraction(interactName, interactType, interactDialogue, playerManager, itemId, itemAmount, monsterId, monsterName, monsterOf);
+                interactions.Add(interaction);
+            }
+
+            return interactions;
         }
 
         /// <summary>
@@ -134,9 +158,31 @@ namespace DungeonExplorer
         }
 
 
-        public static Dictionary<Id, Item> GetItemXML(PlayerManager playerManager)
+        /* Create a dictionary <items> and initialise
+         * every item in the items.xml file. The dictionary stores
+         * items as a key value pair where the key is the string
+         * identifier (xml element id) for the item.
+         */
+        public static Dictionary<string, Item> GetItemXML(PlayerManager playerManager)
         {
-            Dictionary<Id, Item> Items = new Dictionary<Id, Item>();
+            Dictionary<string, Item> Items = new Dictionary<string, Item>();
+            string path = Game.textDir + "items.xml";
+
+            if (File.Exists(path))
+            {
+                XElement itemsXElement = XElement.Load(path);
+                List<XElement> itemXElements = itemsXElement.Elements().ToList();
+                foreach (XElement itemX in itemXElements)
+                {
+                    string name = itemX.Attribute("name").Value;
+                    string type = itemX.Attribute("type").Value;
+                    string description = itemX.Value.ToString();
+                    Id id = new Id(itemX.Attribute("id").Value);
+
+                    Item item = new Card(id, name, description);
+                    Items.Add(id.Val, item);
+                }
+            }
 
             return Items;
         }
@@ -145,7 +191,27 @@ namespace DungeonExplorer
         {
             Dictionary<Id, Monster> Monsters = new Dictionary<Id, Monster>();
 
+            Dictionary<Id, Item> Items = new Dictionary<Id, Item>();
+            string path = Game.textDir + "creatures.xml";
+
+            if (File.Exists(path))
+            {
+                XElement monstersXElement = XElement.Load(path);
+                List<XElement> monsterXElements = monstersXElement.Elements().ToList();
+                foreach (XElement monsterX in monsterXElements)
+                {
+                    string name = monsterX.Attribute("name").Value;
+                    string type = monsterX.Attribute("type").Value;
+                    string description = monsterX.Value.ToString();
+                    Id id = new Id(monsterX.Attribute("id").Value);
+
+                    Item item = new Card(id, name, description);
+                    Items.Add(id, item);
+                }
+            }
+
             return Monsters;
         }
     }
 }
+ 

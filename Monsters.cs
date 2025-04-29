@@ -30,7 +30,7 @@ namespace DungeonExplorer
         /// <value>
         /// Equivalent to attack damage: drains the players Energy.
         /// </value>
-        public int OverwhelmFactor {  get; protected set; }
+        public CreatureAttribute Damage { get; protected set; } = new CreatureAttribute("Damage");
 
         /// <value>
         /// Whether the monster has been defeated.
@@ -42,19 +42,28 @@ namespace DungeonExplorer
         /// </value>
         public PlayerManager PlayerManager;
 
-        public Monster(string name, string dialogue, int overwhelmFactor, PlayerManager playerManager)
+        public Monster(string name, string dialogue, int damage, PlayerManager playerManager)
         {
             this.Name = name ?? throw new ArgumentNullException(nameof(name), "The name cannot be null.");
             this.Dialogue = dialogue ?? throw new ArgumentNullException(nameof(dialogue), "The dialogue cannot be null.");
+            this.Damage.Value = damage;
             this.PlayerManager = playerManager ?? throw new ArgumentNullException(nameof(dialogue), "The PlayerManager cannot be null.");
-
-            this.OverwhelmFactor = overwhelmFactor;
             this.Defeated = false;
+            this.Energy.Value = 100;
+
+            Damage.Value = damage;
         }
 
-        public void Attack()
+        public int Attack()
+        {   
+            int damage = Damage.Value;
+            damage = PlayerManager.TakeDamage(Damage.Value);
+            return damage;
+        }
+
+        public void TakeDamage(int damage)
         {
-            PlayerManager.TakeDamage(OverwhelmFactor);
+            Energy.Value -= damage;
         }
     }
 
@@ -62,7 +71,7 @@ namespace DungeonExplorer
     {   
         public SocialMonster(string name, string dialogue, int overwhelmFactor, PlayerManager playerManager) : base(name, dialogue, overwhelmFactor, playerManager)
         {
-            Type = "Social Monster";
+            Type = "social";
             Aura = "Countless voices clutter your mind as you find yourself unable to think clearly.";
         }
     }
@@ -71,7 +80,7 @@ namespace DungeonExplorer
     {
         public SensoryMonster(string name, string dialogue, int overwhelmFactor, PlayerManager playerManager) : base(name, dialogue, overwhelmFactor, playerManager)
         {
-            Type = "Sensory Monster";
+            Type = "sensory";
             Aura = "Your nerves tingle as your mind clouds over, clouded by its relentless stabbing.";
         }
     }
@@ -80,7 +89,7 @@ namespace DungeonExplorer
     {
         public InternalMonster(string name, string dialogue, int overwhelmFactor, PlayerManager playerManager) : base(name, dialogue, overwhelmFactor, playerManager)
         {
-            Type = "Internal Monster";
+            Type = "internal";
             Aura = "Your vision fades and the surroundings become a blur, you shake yourself from head to toe.";
         }
     }

@@ -17,5 +17,16 @@ namespace DungeonExplorer
         /// Reference to the <c>PlayerManager</c> instance the monster may interacts with.
         /// </value>
         public PlayerManager playerManager;
+
+
+        /// <value>
+        /// Property <c>Energy</c> is a measure of how much more of this the creature can take.
+        /// </value>
+
+        public CreatureAttribute Energy;
+        public Creature()
+        {
+            Energy = new CreatureAttribute("Energy", 100);
+        }
     }
 }

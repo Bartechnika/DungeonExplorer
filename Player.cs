@@ -15,7 +15,7 @@ namespace DungeonExplorer
         /// <summary>
         /// Struct <c>pronouns</c> allows the user to set any number of subject, object and possessive pronouns.
         /// </summary>
-        public struct pronouns 
+        public struct pronouns
         {
             /// <value>
             /// Property <c>Subjects</c> is a list of all subject pronouns chosen by the user
@@ -83,13 +83,14 @@ namespace DungeonExplorer
         /// <value>
         /// Property <c>Energy</c> is a measure of how much more of this the player can take.
         /// </value>
-        public CreatureAttribute Energy;
+        /// 
+
+        public bool overwhelmed = false;
 
         public Player()
         {
             Resilience = new CreatureAttribute("Resilience", 0);
             Imagination = new CreatureAttribute("Imagination", 0);
-            Energy = new CreatureAttribute("Energy", 0);
         }
 
         /// <summary>
@@ -121,7 +122,7 @@ namespace DungeonExplorer
         /// Method <c>SetPronouns</c> constructs pronoun lists for the player.
         /// </summary>
         public void SetPronouns()
-        {   
+        {
             List<string> Subjects = new List<string>();
             List<string> Objects = new List<string>();
             List<string> Possessives = new List<string>();
@@ -147,7 +148,7 @@ namespace DungeonExplorer
                     }
                 }
 
-                if(addObject)
+                if (addObject)
                 {
                     next = Game.ValidateInputSelection("Would you like to add another object pronoun? Enter (Y/N) ");
                     if (next == "n")

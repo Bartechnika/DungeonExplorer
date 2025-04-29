@@ -28,10 +28,9 @@ namespace DungeonExplorer
         /// </value>
         public string Description { get; private set; }
 
-        public Item(string id, string name, string description)
+        public Item(Id id, string name, string description)
         {
-            Console.WriteLine(id);
-            ItemId.Val = id ?? throw new ArgumentNullException(nameof(id), "The id cannot be null.");
+            ItemId = id ?? throw new ArgumentNullException(nameof(id), "The id cannot be null.");
             Name = name ?? throw new ArgumentNullException(nameof(name), "The name cannot be null.");
             Description = description ?? throw new ArgumentNullException(nameof(name), "The description cannot be null.");
         }
@@ -53,7 +52,7 @@ namespace DungeonExplorer
     /// </summary>
     public class Empty : Item
     {
-        public Empty(string id="-1", string name = "empty", string description="empty-inventory-slot") : base(id, name, description)
+        public Empty(Id id, string name = "empty", string description="empty-inventory-slot") : base(id, name, description)
         {
 
         }
@@ -65,7 +64,7 @@ namespace DungeonExplorer
     /// </summary>
     public class Card : Item
     {
-        public Card(string id, string name, string description = "empty-inventory-slot") : base(id, name, description)
+        public Card(Id id, string name, string description = "empty-inventory-slot") : base(id, name, description)
         {
 
         }
@@ -77,7 +76,7 @@ namespace DungeonExplorer
     /// </summary>
     public class ComfortToy : Item
     {
-        public ComfortToy(string id, string name, string description = "empty-inventory-slot") : base(id, name, description)
+        public ComfortToy(Id id, string name, string description = "empty-inventory-slot") : base(id, name, description)
         { 
             
         }

@@ -65,36 +65,27 @@ namespace DungeonExplorer
 
         public void Enter()
         {
-            string art = Game.GetArt("room");
-            art = Game.PopulateField(art, "{room~~~~~~~~~~~~~~~}", Name);
-            Console.WriteLine(art);
-            Game.WriteDialogue($"Description: {Description}\n");
-            Game.WriteDialogue(EntranceDialogue);
+            UI.ClearConsole();
+            string art = UI.GetArt("room", Game.locDir);
+            art = UI.PopulateField(art, "{room-name~~~~~~~~~~}", Name);
 
             CurLoc = StartLoc;
-            string locArt = "";
 
-            bool exit = false;
-            bool changeLoc = false;
             location nextLoc;
-            while (!exit)
+            while (true)
             {
-                locArt = Game.GetArt("location");
-                locArt = Game.PopulateField(locArt, "{location~~~~~~~~~~~}", CurLoc.Name);
-                Console.WriteLine(locArt);
+                UI.GetLocation(CurLoc);
+                nextLoc = CurLoc.Enter();
+                if (CurLoc.exitRoom == true) { CurLoc.exitRoom = false; break; }
+                CurLoc = nextLoc;
 
-                exit = CurLoc.TriggerInteraction();
-                if (exit)
-                {
-                    break;
-                }
-
+                /*
                 // Default actions incl. CheckPockets() can be performed multiple times in a single location
                 // until the user selects the option of changing location, in which case the loop is terminated.
                 changeLoc = false;
                 while (!changeLoc)
                 {
-                    nextLoc = CurLoc.Navigate();
+                    nextLoc = CurLoc.Enter();
 
                     // Check if the player wants to exit the current room but current location is not changed as a result.
                     if (nextLoc.exit == true)
@@ -108,7 +99,7 @@ namespace DungeonExplorer
                         CurLoc = nextLoc;
                         changeLoc = true;
                     }
-                }
+                }*/
             }
 
             Exit();
@@ -116,8 +107,7 @@ namespace DungeonExplorer
 
         public void Exit()
         {
-            Console.WriteLine("");
-            Game.WriteDialogue(ExitDialogue);
+            UI.WriteDialogue(ExitDialogue);
         }
 
         public override string ToString()

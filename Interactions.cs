@@ -11,11 +11,13 @@ namespace DungeonExplorer
     /// </summary>
     public abstract class Interaction
     {
+        public string Name {  get; set; }
         public string dialogue;
         public PlayerManager PlayerManager;
 
-        public Interaction(string dialogue, PlayerManager playerManager)
+        public Interaction(string name, string dialogue, PlayerManager playerManager)
         {
+            this.Name = name;
             this.dialogue = dialogue ?? throw new ArgumentNullException(nameof(dialogue));
             this.PlayerManager = playerManager ?? throw new ArgumentNullException(nameof(playerManager));
         }
@@ -24,14 +26,14 @@ namespace DungeonExplorer
 
     public class Dialogue : Interaction
     {
-        public Dialogue(string dialogue, PlayerManager playerManager) : base(dialogue, playerManager)
+        public Dialogue(string name, string dialogue, PlayerManager playerManager) : base(name, dialogue, playerManager)
         {
 
         }
 
         public override bool Interact()
         {
-            Game.WriteDialogue(this.dialogue);
+            UI.WriteDialogue(this.dialogue);
             Console.WriteLine("");
             return false;
         }
@@ -43,9 +45,9 @@ namespace DungeonExplorer
         private int Amount { get; set; }
         private string Store { get; set; }
         private bool Found { get; set; }
-        public FoundItem(string dialogue, PlayerManager playerManager, Id id, int amount) : base(dialogue, playerManager)
+        public FoundItem(string name, string dialogue, PlayerManager playerManager, Id id, int amount) : base(name, dialogue, playerManager)
         {
-            this.item = Game.Items[id] ?? throw new ArgumentNullException(nameof(id));
+            this.item = Game.Items[id.Val] ?? throw new ArgumentNullException(nameof(id));
             this.Found = false;
         }
 
@@ -61,7 +63,7 @@ namespace DungeonExplorer
             }
             else
             {
-                Game.WriteDialogue(this.dialogue);
+                UI.WriteDialogue(this.dialogue);
                 string sel = Game.ValidateInputSelection("Store item in pockets or rucksack? (pockets/rucksack): ", new string[] { "pockets", "rucksack" });
                 PlayerManager.PickupItem(sel, item, Amount);
                 Found = true;
@@ -71,13 +73,27 @@ namespace DungeonExplorer
         }
     }
 
-
     public class FightMonster : Interaction
     {
         public Monster Monster;
-        public FightMonster(string dialogue, PlayerManager playerManager, Id monsterId) : base(dialogue, playerManager)
+        public FightMonster(string name, string dialogue, PlayerManager playerManager, Id monsterId, string monsterName, int of) : base(name, dialogue, playerManager)
         {
-            Monster = Game.Monsters[monsterId] ?? throw new ArgumentNullException(nameof(monsterId));
+            string myId = monsterId.Val;
+            Monster monster = null;
+            switch (myId)
+            {
+                case "#001":
+                    monster = new SensoryMonster(monsterName, dialogue, of, playerManager);
+                    break;
+                case "#002":
+                    monster = new SocialMonster(monsterName, dialogue, of, playerManager);
+                    break;
+                case "#003":
+                    monster = new InternalMonster(monsterName, dialogue, of, playerManager);
+                    break;
+            }
+            Monster = monster;
+            //Monster = Game.Monsters[monsterId] ?? throw new ArgumentNullException(nameof(monsterId));
         }
 
         public override bool Interact()
@@ -87,18 +103,12 @@ namespace DungeonExplorer
 
         public bool CreateMonster()
         {
-            bool flee = false;
+            bool playerDefeated = false;
 
-            Game.WriteDialogue($"*{Monster.Aura}*");
-            string art = Game.GetArt("creature");
-            art = Game.PopulateField(art, "{name~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~}", Monster.Name);
-            art = Game.PopulateField(art, "{type~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~}", Monster.Type);
-            art = Game.PopulateField(art, "{OF~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~}", Monster.OverwhelmFactor.ToString());
-            Console.WriteLine(art);
+            string fightArt = UI.GetFight(Monster);
 
-            Game.WriteDialogue(Monster.Dialogue);
-            string sel = Game.ValidateInputSelection("Fight or flight? (fight/flee) ", new string[] { "fight", "flee" });
-
+            //string sel = Game.ValidateInputSelection("Fight or flight? (fight/flee) ", new string[] { "fight", "flee" });
+            /*
             switch (sel)
             {
                 case "fight":
@@ -108,9 +118,11 @@ namespace DungeonExplorer
                     flee = true;
                     RunAway();
                     break;
-            }
+            }*/
 
-            return flee;
+            playerDefeated = Fight(fightArt);
+
+            return playerDefeated;
         }
 
         public void RunAway()
@@ -118,25 +130,82 @@ namespace DungeonExplorer
             Console.WriteLine("You need to get out of here - you flee\n");
         }
 
-        public void Fight()
+        public bool Fight(string fightArt)
         {
-            Console.WriteLine("You will stay and work through the pain");
-            Monster.Attack();
+            Ability ability;
+
+            string[] ops = new string[5 + 1];
+            ops[ops.Length - 1] = "¬";
+            for(int i = 0; i < ops.Length-1; i++)
+            {
+                ops[i] = (i+1).ToString();
+            }
+
+            string sel;
+
+            int pDmg;
+            int mDmg;
+            bool monsterDefeated = false;
+            bool playerDefeated = false;
+            while(!monsterDefeated && !playerDefeated)
+            {
+                // Monster turn
+                mDmg = Monster.Attack();
+                UI.UpdateFight(fightArt, Monster, PlayerManager, 2, 0, mDmg);
+
+                if (PlayerManager.player.overwhelmed == true)
+                {
+                    playerDefeated = true;
+                    break;
+                }
+
+                Console.WriteLine("\nPlease pick an ability (1-5)...\n");
+                Console.WriteLine("¬ back");
+                sel = Game.ValidateInputSelection("\n-> ", ops);
+                if (sel != "¬")
+                {
+                    ability = CombatManager.abilitySelectionMatrix[sel];
+                    ability.Use();
+                    Game.Wait(2);
+
+                    pDmg = CombatManager.abilityDamageMatrix[ability.Name][Monster.Type];
+
+                    Monster.TakeDamage(pDmg);
+                    UI.UpdateFight(fightArt, Monster, PlayerManager, 1, pDmg, 0, ability);
+                    Console.ReadKey();
+                }
+
+                if (Monster.Energy.Value == 0)
+                {
+                    monsterDefeated = true;
+                }
+
+            }
+            if(monsterDefeated)
+            {
+                Win();
+            }
+
+            return playerDefeated;
+        }
+
+        public void Win()
+        {
+            Console.WriteLine("You won the fight!");
         }
     }
 
     public class Mirror : Interaction
     {
-        public Mirror(string dialogue, PlayerManager playerManager) : base(dialogue, playerManager)
+        public Mirror(string name, string dialogue, PlayerManager playerManager) : base(name, dialogue, playerManager)
         {
 
         }
 
         public override bool Interact()
         {
-            Game.WriteDialogue(this.dialogue);
+            UI.WriteDialogue(this.dialogue);
             PlayerManager.PlayerState();
-            PlayerManager.InventoryContents();
             return false;
         }
     }

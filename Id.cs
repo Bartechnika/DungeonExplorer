@@ -35,5 +35,7 @@ namespace DungeonExplorer
                 val = value;
             }
         }
+
+        public Id(string value) { Val = value; }
     }
 }

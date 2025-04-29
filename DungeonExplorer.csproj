@@ -43,6 +43,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CombatManager.cs" />
     <Compile Include="CreatureAttribute.cs" />
     <Compile Include="Creature.cs" />
     <Compile Include="Id.cs" />
@@ -61,6 +62,7 @@
     <Compile Include="Room.cs" />
     <Compile Include="GameMap.cs" />
     <Compile Include="Testing.cs" />
+    <Compile Include="UI.cs" />
     <Compile Include="XMLManager.cs" />
   </ItemGroup>
   <ItemGroup>

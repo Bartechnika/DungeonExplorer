@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Rooms>
+	<!--
 	<room>
 		<name>
 			Room-Name
@@ -13,50 +14,82 @@
 		<exitDialogue>
 			You leave the example room.
 		</exitDialogue>
-		<interaction type="found-item">
-			<dialogue>The dialogue for this example interaction.</dialogue>
-			<item name="" id="#0001"></item>
-			<fight name="" id="#0001"></fight>
-		</interaction>
+		<location name="example-location-name" adj="next-room">
+			<interaction name="" type="found-item">
+				<dialogue>The dialogue for this example interaction.</dialogue>
+				<item name="" id="#0000" amount="0"></item>
+				<fight name="" id="#0000"></fight>
+			</interaction>
+		</location>
 	</room>
-	
+	-->
 
 	<bathroom>
 		<name>
 			Bathroom
 		</name>
 		<description>
-			A small bathroom with a shower to the left. 
+			A small bathroom with a shower to the left.
 			Toiletries sat idling in cups stacked along the window sill.
 		</description>
 		<entranceDialogue>
 			You trudge into the bathroom half-awake and make your way to the cabinet.
 		</entranceDialogue>
-		<location name="bathroom-mirror" adj="sink:true">
-			<interaction type="mirror">
-				*you stare at yourself in the shiny mirror under good lighting*
-				Tip: you can only see your stats when looking into a reflective surface.
-			</interaction>
-		</location>
-		<location name="cabinet" adj="sink:true,bathroom-door:false">
-			<interaction type="dialogue">*you reach out to grab your toothbrush*</interaction>
-		</location>
-		<location name="sink" adj="bathroom-door:false">
-			<interaction type="battle-demons">
-				<creature name="Water Conjuror" type="sensory-creature" of="1">
-					Fighting increases your resilience - you can't flee forever.
-				</creature>
-			</interaction>
-		</location>
-		<location name="bathroom-door" adj="sink:true">
-			<interaction type="dialogue">you turn to leave</interaction>
-		</location>
 		<exitDialogue>
 			You hastily leave the room, tap still running.
 		</exitDialogue>
 		<next>bedroom</next>
+
+		<location name="bathroom-mirror" adj="sink:true">
+			<description>A clean bathroom mirror</description>
+			<dialogue></dialogue>
+			<interaction name="Good look" type="mirror">
+				<dialogue>
+					*you stare at yourself in the shiny mirror under good lighting*
+					Tip: you can only see your stats when looking into a reflective surface.
+				</dialogue>
+				<item name="" id="#000" amount="0"></item>
+				<monster name="" id="#000" of=""></monster>
+			</interaction>
+		</location>
+
+		<location name="cabinet" adj="sink:true,bathroom-door:false">
+			<description></description>
+			<dialogue></dialogue>
+			<interaction name="" type="dialogue">
+				<dialogue>
+					*you reach out to grab your toothbrush*
+				</dialogue>
+				<item name="" id="#000" amount="0"></item>
+				<monster name="" id="#000" of=""></monster>
+			</interaction>
+		</location>
+
+		<location name="sink" adj="bathroom-door:false">
+			<description></description>
+			<dialogue></dialogue>
+			<interaction name="" type="fight-monster">
+				<dialogue>
+					Fighting increases your resilience - you can't flee forever.
+				</dialogue>
+				<item name="" id="#000" amount="0"></item>
+				<monster name="Water Conjuror" id="#001" of="1"></monster>
+			</interaction>
+		</location>
+
+		<location name="bathroom-door" adj="sink:true">
+			<description></description>
+			<dialogue></dialogue>
+			<interaction name="" type="dialogue">
+				<dialogue>
+					You turn to leave
+				</dialogue>
+				<item name="" id="#000" amount=""></item>
+				<monster name="" id="#000" of=""></monster>
+			</interaction>
+		</location>
 	</bathroom>
-	
+
 	<bedroom>
 		<name>
 			Your bedroom
@@ -67,46 +100,76 @@
 		<entranceDialogue>
 			Time to get sorted for the day.
 		</entranceDialogue>
-		<location name="hook" adj="door:true">
-			<interaction type="found-item">
-				<item id="0" amount="1">
-					you take your rucksack off the hook and remember to pocket your ID card.
-				</item>
-			</interaction>
-		</location>
-		<location name="door" adj="hook:true">
-			<interaction type="dialogue">cya later room :) OH i forgot to turn off my lights...</interaction>
-		</location>
 		<exitDialogue>
 			all ready for the day.
 		</exitDialogue>
 		<next>car</next>
+
+		<location name="hook" adj="door:true">
+			<description></description>
+			<dialogue></dialogue>
+			<interaction name="" type="found-item">
+				<dialogue>
+					you take your rucksack off the hook and remember to pocket your ID card.
+				</dialogue>
+				<item name="" id="#001" amount="1"></item>
+				<monster name="" id="#000" of=""></monster>
+			</interaction>
+		</location>
+
+		<location name="door" adj="hook:true">
+			<description></description>
+			<dialogue></dialogue>
+			<interaction name="" type="dialogue">
+				<dialogue>
+					cya later room :) OH i forgot to turn off my lights...
+				</dialogue>
+				<item name="" id="#000" amount=""></item>
+				<monster name="" id="#000" of=""></monster>
+			</interaction>
+		</location>
 	</bedroom>
-	
+
 	<car>
 		<name>
 			Car journey
 		</name>
 		<description>
-			A leisurely ride the train station through the apocalyptic utopia of Autodale. 
+			A leisurely ride the train station through the apocalyptic utopia of Autodale.
 		</description>
 		<entranceDialogue>
 			you hop in the passenger seat, rucksack in hand.
 		</entranceDialogue>
-		<location name="seat" adj="turn-around:true">
-			<interaction type="dialogue">*road works again?*</interaction>
-		</location>
-		<location name="turn-around" adj="seat:true">
-			<interaction type="found-item">
-				<item id="1" amount="1">you look behind you to see Octopus sitting lonely on the backseat</item>
-			</interaction>
-		</location>
 		<exitDialogue>
 			See you later! x
 		</exitDialogue>
 		<next>train-platform</next>
+
+		<location name="seat" adj="turn-around:true">
+			<description></description>
+			<dialogue></dialogue>
+			<interaction name="" type="dialogue">
+				<dialogue>
+					*road works again?*
+				</dialogue>
+				<item name="" id="#000" amount=""></item>
+				<monster name="" id="#000" of=""></monster>
+			</interaction>
+		</location>
+
+		<location name="turn-around" adj="seat:true">
+			<description></description>
+			<dialogue></dialogue>
+			<interaction name="" type="found-item">
+				<dialogue>
+					you look behind you to see Octopus sitting lonely on the backseat
+				</dialogue>
+				<item name="" id="#002" amount="1"></item>
+				<monster name="" id="#000" of=""></monster>
+			</interaction>
+		</location>
 	</car>
-	
+
 	<train-platform>
 		<name>
 			Train platform
@@ -117,18 +180,35 @@
 		<entranceDialogue>
 			I arrived early enough - right?
 		</entranceDialogue>
-		<location name="entrance" adj="platform:true" intro="Welcome to Hawkins Station.">
-			<interaction type="dialogue">*you look at the train times to your left*</interaction>
-		</location>
-		<location name="platform" adj="entrance:true" intro="Waaaah waaaah waaaaah!!! TOOT TOOT">
-			<interaction type="found-item">
-				<item id="2" amount="1">you look at the bus stop pole and see a sticker</item>
+		<next>car</next>
+
+		<location name="entrance" adj="platform:true">
+			<description></description>
+			<dialogue>Welcome to Hawkins Station.</dialogue>
+			<interaction name="" type="dialogue">
+				<dialogue>
+					*you look at the train times to your left*
+				</dialogue>
+				<item name="" id="#000" amount="0"></item>
+				<monster name="" id="#000" of=""></monster>
 			</interaction>
 		</location>
+
+		<location name="platform" adj="entrance:true">
+			<description></description>
+			<dialogue>Waaaah waaaah waaaaah!!! TOOT TOOT</dialogue>
+			<interaction name="" type="dialogue">
+				<dialogue>
+					you look at the bus stop pole and see a sticker
+				</dialogue>
+				<item name="" id="#000" amount="0"></item>
+				<monster name="" id="#000" of=""></monster>
+			</interaction>
+		</location>
+
 		<exitDialogue>
 			You get back in the car after a long day.
 		</exitDialogue>
-		<next>car</next>
 	</train-platform>
-	
+
 </Rooms>

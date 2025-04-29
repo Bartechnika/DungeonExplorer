@@ -1,3 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
-<creature type="sensory" name="water-beast">
-</creature>
+<monsters>
+	<monster type="sensory-creature" id="#001"></monster>
+</monsters>

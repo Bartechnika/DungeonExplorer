@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -22,7 +23,7 @@ namespace DungeonExplorer
             if (itemStack == null)
             {
                 IsEmpty = true;
-                ItemStack = new ItemStack(new Empty(), 0);
+                ItemStack = new ItemStack(new Empty(new Id("#000")), 0);
             }
             else
             {

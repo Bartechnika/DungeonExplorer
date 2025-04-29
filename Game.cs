@@ -16,10 +16,14 @@ namespace DungeonExplorer
         public string curDir { get; set; }
         public static string artDir { get; set; }
         public static string textDir {  get; set; }
+        public static string locDir { get; set; }
+        public static string menuDir { get; set; }
+        public static string monsterDir { get; set; }
+        public static string abilitiesDir { get; set; }
 
         // Interaction elements
-        public static Dictionary<Id, Item> Items;
-        public static Dictionary<Id, Monster> Monsters;
+        public static Dictionary<string, Item> Items;
+        public static Dictionary<string, Monster> Monsters;
         public Game()
         {
             // Initialise directory variables
@@ -27,12 +31,17 @@ namespace DungeonExplorer
             curDir = Directory.GetParent(workingDir).Parent.FullName;
             artDir = curDir + "\\assets\\art\\";
             textDir = curDir + "\\assets\\data\\";
+            locDir = "\\location\\";
+            menuDir = "\\main_menu\\";
+            monsterDir = "\\monsters\\";
+            abilitiesDir = "\\abilities\\";
+
 
             // Initialize the game with one room and one player
             playerManager = new PlayerManager();
 
             Items = XMLManager.GetItemXML(playerManager);
-            Monsters = XMLManager.GetMonsterXML(playerManager);
+            //Monsters = XMLManager.GetMonsterXML(playerManager);
         }
 
         /* --- Utility Functions ---
@@ -43,122 +52,6 @@ namespace DungeonExplorer
          * WriteDialogue()
          * ValidUserInput()
          */
-
-        /// <summary>
-        /// Method <c>GetArt></c> Retrieves an art file from the assets folder.
-        /// </summary>
-        /// <param name="file"></param>
-        /// <returns> 
-        /// The art file
-        /// </returns>
-        /// <exception cref="FileNotFoundException">
-        /// Thrown when the art file is not found.
-        /// </exception>
-        public static string GetArt(string file)
-        {   
-            string path = artDir + file + ".txt";
-            Debug.Assert(File.Exists(path)); // check if the art file exists
-            if (File.Exists(path))
-            {
-                return File.ReadAllText(path);
-            }
-            else
-            {
-                throw new FileNotFoundException("File does not exist...");
-            }
-        }
-
-        /// <summary>
-        /// Method <c>PopulateField</c> replaces dummy text in an art file with the supplied parameter.
-        /// </summary>
-        /// <param name="art">the art file.</param>
-        /// <param name="field">the field in the art file to populate.</param>
-        /// <param name="para">the data to populate the field.</param>
-        /// <returns> 
-        /// A new art file 
-        /// </returns>
-        public static string PopulateField(string art, string field, string para)
-        {
-            if(para.Length  > field.Length)
-            {
-                throw new ArgumentOutOfRangeException("Parameter must be less than or equal to length of field to occupy.");
-            }
-            para += new string(' ', field.Length - para.Length);
-            return art.Replace(field, para);
-        }
-        
-        /// <summary>
-        /// Method <c>GetDialogue</c> writes dialogue to the console.
-        /// </summary>
-        /// <param name="header_name">the XElement with name <c>header_name</c> storing the dialogue to be retrieved.</param>
-        /// <exception cref="FileNotFoundException">
-        /// Thrown when the dialogue XML file is not found.
-        /// </exception>
-        public static void GetDialogue(string header_name)
-        {
-            string txt = "";
-            string path = textDir + "dialogue.xml";
-            if (File.Exists(path))
-            {
-                try
-                {   
-                    // TODO: Add further exception handling for case of Element("Text") returning null.
-                    txt = XElement.Load(path).Element(header_name).Element("text").Value.Trim();
-                }
-                catch
-                {
-                    throw new NullReferenceException("Either dialogue does not exist or is not properly formatted.");
-                }
-            }
-            else
-            {
-                throw new FileNotFoundException("File does not exist...");
-            }
-
-            WriteDialogue(txt);
-        }
-
-        /// <summary>
-        /// Method <c>StripText</c> splits input text into new lines.
-        /// </summary>
-        /// <param name="txt"></param>
-        /// <returns>
-        /// An array of string values, each representing a line of the input text.
-        /// </returns>
-        public static string[] StripText(string txt)
-        {   
-            // Split the text using either new line characters as delimiters.
-            string[] line = txt.Split(new[] { '\r', '\n' });
-            for (int i = 0; i < line.Length; i++)
-            {
-                line[i] = line[i].Trim();
-            }
-            return line;
-        }
-
-        /// <summary>
-        /// Method <c>WriteDialogue</c> outputs text with a delay for ease of reading.
-        /// </summary>
-        /// <param name="message"></param>
-        /// <param name="wait"></param>
-        public static void WriteDialogue(string txt, int wait = 10)
-        {
-            string[] dialogue = StripText(txt);
-            int charDelay = 35;
-            foreach(string s in dialogue)
-            {
-                if (s.Length > 1)
-                {
-                    foreach (char c in s)
-                    {
-                        System.Threading.Thread.Sleep(charDelay);
-                        Console.Write(c);
-                    }
-                    Console.Write('\n');
-                    System.Threading.Thread.Sleep(wait);
-                }
-            }
-        }
 
         /// <summary>
         /// Method <c>ValidateInputSelection</c> requests user input and checks it against a set of possible options.
@@ -204,25 +97,19 @@ namespace DungeonExplorer
 
         private void GameIntroduction()
         {
-            Console.WriteLine(GetArt("intro"));
-            MainMenu();
-        }
-
-        private void MainMenu()
-        {
-            Console.WriteLine(GetArt("menu"));
-
-            string[] options = new string[] { "1", "2", "3" };
-            string sel = ValidateInputSelection("Please enter 1, 2 or 3 from the menu options: ", options);
-
-            // For debugging purposes, the first menu option "~ hit bed ~" will run when either 1,2 or 3 is entered by the user.
+            Console.Write(UI.GetArt("title_screen"));
+            Console.ReadKey();
+            GameLoop();
+            UI.GetMainMenu();
             InitialiseGame();
         }
 
+
         private void InitialiseGame()
         {
-            Console.WriteLine(GetArt("start"));
-            GetDialogue("introduction-1");
+            UI.ClearConsole();
+            Console.WriteLine(UI.GetArt("start"));
+            UI.GetDialogue("introduction-1");
 
             Dictionary<string, int> times = new Dictionary<string, int>
             {
@@ -238,17 +125,18 @@ namespace DungeonExplorer
 
             Console.WriteLine("\n*New attribute unlocked: energy*\n");
 
-            GetDialogue("introduction-2");
+            UI.GetDialogue("introduction-2");
 
-            Console.WriteLine(GetArt("play"));
+            Console.WriteLine(UI.GetArt("play"));
 
-            GetDialogue("introduction-3");
-            GetDialogue("introduction-4");
+            UI.GetDialogue("introduction-3");
+            UI.GetDialogue("introduction-4");
 
             Console.WriteLine("\n*New attribute unlocked: resilience*\n");
 
-            GetDialogue("introduction-5");
-            GetDialogue("introduction-6");
+            UI.GetDialogue("introduction-5");
+            UI.ClearConsole();
+            UI.GetDialogue("introduction-6");
 
             GameCustomisation();
         }
@@ -258,16 +146,16 @@ namespace DungeonExplorer
         /// </summary>
         private void GameCustomisation()
         {
-            GetDialogue("introduction-7");
+            UI.GetDialogue("introduction-7");
 
             playerManager.player.SetName();
-            string id = GetArt("id");
-            id = PopulateField(id, "{name~~~~~~~~~~~~~~~~~~~~~~~~~}", playerManager.player.Name);
+            string id = UI.GetArt("id");
+            id = UI.PopulateField(id, "{name~~~~~~~~~~~~~~~~~~~~~~~~~}", playerManager.player.Name);
             string pronouns = (playerManager.player.myPronouns.GetSubject() + "/" + playerManager.player.myPronouns.GetObject() + "/" + playerManager.player.myPronouns.GetPossessive());
-            id = PopulateField(id, "{pronouns~~~~~~~~~~~~~~~~~}", pronouns);
+            id = UI.PopulateField(id, "{pronouns~~~~~~~~~~~~~~~~~}", pronouns);
             Console.WriteLine(id);
 
-            GetDialogue("introduction-8");
+            UI.GetDialogue("introduction-8");
 
             GameLoop();
         }
@@ -281,6 +169,11 @@ namespace DungeonExplorer
             {
                 roomManager.Update();
             }
+        }
+
+        public static void Wait(int seconds)
+        {
+            System.Threading.Thread.Sleep(seconds*1000);
         }
     }
 }

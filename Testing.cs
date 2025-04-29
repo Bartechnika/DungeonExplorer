@@ -35,9 +35,11 @@ namespace DungeonExplorer
             // Arrange
             int expected = 4;
 
-            ThisPlayerManager.PickupItem("pockets", "1", 1);
-            ThisPlayerManager.PickupItem("pockets", "1", 1);
-            ThisPlayerManager.PickupItem("pockets", "1", 1);
+            /*
+            ThisPlayerManager.PickupItem("pockets", "#001", 1);
+            ThisPlayerManager.PickupItem("pockets", "#001", 1);
+            ThisPlayerManager.PickupItem("pockets", "#001", 1);
+            */
 
             //Debug.Assert(ThisPlayerManager.NextEmptyPocket == expected, "The NextEmptyPocket pointer is assigned incorrectly.");
         }

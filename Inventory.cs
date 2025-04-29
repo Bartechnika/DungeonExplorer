@@ -9,10 +9,32 @@ namespace DungeonExplorer
 {
     public class Inventory
     {
-        public const int maxPocketSlots = 3;
+        public const int maxHotbarSlots = 3;
+        public const int maxPocketSlots = 12;
         public const int maxRucksackSlots = 10;
+        public InventorySlot[] Hotbar { get; } = new InventorySlot[maxHotbarSlots];
         public InventorySlot[] Pockets { get; } = new InventorySlot[maxPocketSlots];
         public InventorySlot[] Rucksack { get; }  = new InventorySlot[maxRucksackSlots];
+
+        /// <value>
+        /// Property <c>_nextEmptyHotbar</c> points to the next inventory pocket slot that is available.
+        /// </value>
+        private int _nextEmptyHotbar;
+        public int NextEmptyHotbar
+        {
+            get => _nextEmptyHotbar;
+            set
+            {
+                if (value > maxHotbarSlots)
+                {
+                    _nextEmptyHotbar = maxHotbarSlots;
+                }
+                else
+                {
+                    _nextEmptyHotbar = value;
+                }
+            }
+        }
 
         /// <value>
         /// Property <c>_nextEmptyPocket</c> points to the next inventory pocket slot that is available.
@@ -69,6 +91,11 @@ namespace DungeonExplorer
             NextEmptyRucksack = 1;
         }
 
+        public void StoreHotbar(Item item)
+        {
+     
+        }
+
         /// <summary>
         /// Method <c>InitialiseRoom</c> loads all necessary data for the room from the "rooms.xml" file.
         /// </summary>
@@ -76,7 +103,7 @@ namespace DungeonExplorer
         /// <exception cref="MissingFieldException"></exception>
         public void StoreItem(string store, Item item, int amount)
         {
-            if (store == "Pockets")
+            if (store == "pockets")
             {
                 if (NextEmptyPocket == maxPocketSlots)
                 {
@@ -91,7 +118,7 @@ namespace DungeonExplorer
                 }
             }
 
-            if (store == "Rucksack")
+            if (store == "rucksack")
             {
                 if (NextEmptyRucksack == maxRucksackSlots)
                 {
@@ -108,22 +135,31 @@ namespace DungeonExplorer
             Console.WriteLine();
         }
 
-        public void InventoryContents()
-        {
-            string art = Game.GetArt("Pockets");
-            Console.WriteLine(art);
-            var contents = new StringBuilder();
-            foreach (var slot in Pockets)
-            {
-                contents.Append(slot.ToString() + " ");
-            }
-            Console.WriteLine(contents.ToString());
-            Console.WriteLine();
-        }
-
         public void CheckPockets()
         {
-            Game.WriteDialogue("\nYou rummage through your Pockets and find:\n");
+            UI.GetPockets(Pockets);
+
+            string[] ops = new string[maxPocketSlots+1];
+            ops[ops.Length - 1] = "¬";
+
+            for (int i = 0; i < maxPocketSlots; i++)
+            {
+                ops[i] = ((char)(i + 65)).ToString();
+            }
+            string sel;
+
+            bool cont = true;
+            while (cont)
+            {
+                Console.WriteLine("\nSelect an item to view in detail (A, B...)\n");
+                Console.WriteLine("¬ back");
+                sel = Game.ValidateInputSelection("\n-> ", ops);
+                InspectItem(Pockets[(int)('A') - 65].ItemStack.Item);
+                if(sel == "¬") { break; }
+            }
+
+            /*
+            UI.WriteDialogue("\nYou rummage through your Pockets and find:\n");
             if (NextEmptyPocket == 1)
             {
                 Console.WriteLine("Your Pockets are empty!\n");
@@ -137,12 +173,12 @@ namespace DungeonExplorer
                 }
                 Console.WriteLine(contents.ToString());
                 Console.WriteLine();
-            }
+            }*/
         }
 
         public void CheckRucksack()
         {
-            Game.WriteDialogue("\nYou rummage through your Rucksack and find:\n");
+            UI.WriteDialogue("\nYou rummage through your Rucksack and find:\n");
             if (NextEmptyPocket == 1)
             {
                 Console.WriteLine("Your Rucksack is empty!\n");
@@ -157,6 +193,11 @@ namespace DungeonExplorer
                 Console.WriteLine(contents.ToString());
                 Console.WriteLine();
             }
+        }
+
+        public void InspectItem(Item item)
+        {
+            Console.WriteLine(($"\nName: {item.ToString()}\nDescription: \n{item.GetDescription()}\n"));
         }
     }
 }
