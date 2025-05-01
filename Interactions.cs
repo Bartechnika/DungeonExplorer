@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.Design;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -14,14 +15,16 @@ namespace DungeonExplorer
         public string Name {  get; set; }
         public string dialogue;
         public PlayerManager PlayerManager;
+        public bool Completed;
 
         public Interaction(string name, string dialogue, PlayerManager playerManager)
         {
             this.Name = name;
             this.dialogue = dialogue ?? throw new ArgumentNullException(nameof(dialogue));
             this.PlayerManager = playerManager ?? throw new ArgumentNullException(nameof(playerManager));
+            Completed = false;
         }
-        public abstract bool Interact();
+        public abstract void Interact();
     }
 
     public class Dialogue : Interaction
@@ -31,11 +34,12 @@ namespace DungeonExplorer
 
         }
 
-        public override bool Interact()
+        public override void Interact()
         {
             UI.WriteDialogue(this.dialogue);
             Console.WriteLine("");
-            return false;
+            UI.WaitForUser();
+
         }
     }
 
@@ -47,7 +51,7 @@ namespace DungeonExplorer
         private bool Found { get; set; }
         public FoundItem(string name, string dialogue, PlayerManager playerManager, Id id, int amount) : base(name, dialogue, playerManager)
         {
-            this.item = Game.Items[id.Val] ?? throw new ArgumentNullException(nameof(id));
+            this.item = GameMap.Items[id.Val] ?? throw new ArgumentNullException(nameof(id));
             this.Found = false;
         }
 
@@ -55,7 +59,7 @@ namespace DungeonExplorer
         /// Method <c>Interact</c> triggers the <c>Playermanager.PickupItem()</c> method only if the item has not already been found.
         /// </summary>
         /// <returns>true if player flees room as a result; false otherwise</returns>
-        public override bool Interact()
+        public override void Interact()
         {
             if (Found)
             {
@@ -64,48 +68,49 @@ namespace DungeonExplorer
             else
             {
                 UI.WriteDialogue(this.dialogue);
-                string sel = Game.ValidateInputSelection("Store item in pockets or rucksack? (pockets/rucksack): ", new string[] { "pockets", "rucksack" });
-                PlayerManager.PickupItem(sel, item, Amount);
-                Found = true;
-                return false;
+                Console.WriteLine("Would you like to store this item in your pockets? (Y/N)");
+                string sel = Game.ValidateInputSelection();
+
+                if(sel=="y")
+                {   
+                    PlayerManager.PickupItem(sel, item, Amount);
+                    Found = true;
+                }
+                else
+                {
+                    Console.WriteLine("Leaving item behind...");
+                }
             }
-            return false;
         }
     }
 
     public class FightMonster : Interaction
     {
         public Monster Monster;
-        public FightMonster(string name, string dialogue, PlayerManager playerManager, Id monsterId, string monsterName, int of) : base(name, dialogue, playerManager)
+        public FightMonster(Id id, string name, string dialogue, PlayerManager playerManager) : base(name, dialogue, playerManager)
         {
-            string myId = monsterId.Val;
-            Monster monster = null;
-            switch (myId)
-            {
-                case "#001":
-                    monster = new SensoryMonster(monsterName, dialogue, of, playerManager);
-                    break;
-                case "#002":
-                    monster = new SocialMonster(monsterName, dialogue, of, playerManager);
-                    break;
-                case "#003":
-                    monster = new InternalMonster(monsterName, dialogue, of, playerManager);
-                    break;
-            }
-            Monster = monster;
-            //Monster = Game.Monsters[monsterId] ?? throw new ArgumentNullException(nameof(monsterId));
+            Monster = GameMap.Monsters[id.Val];
         }
 
-        public override bool Interact()
+        public override void Interact()
         {
-            return CreateMonster();
+            if( Monster.Defeated == true)
+            {
+                Console.WriteLine("Monster defeated! Please try another interaction.");
+            }
+            else
+            {
+                CreateMonster();
+            }
         }
 
         public bool CreateMonster()
         {
             bool playerDefeated = false;
 
-            string fightArt = UI.GetFight(Monster);
+            //ChooseItems();
+
+            string fightArt = UI.GetFight(Monster, PlayerManager);
 
             //string sel = Game.ValidateInputSelection("Fight or flight? (fight/flee) ", new string[] { "fight", "flee" });
             /*
@@ -130,21 +135,20 @@ namespace DungeonExplorer
             Console.WriteLine("You need to get out of here - you flee\n");
         }
 
+        /*
+        public void ChooseItems()
+        {
+            string chooseItems = UI.GetArt("monster_start", Game.monsterDir);
+            Console.WriteLine(chooseItems);
+            PlayerManager.ChooseItems();
+            UI.ClearConsole();
+        }*/
+
         public bool Fight(string fightArt)
         {
-            Ability ability;
-
-            string[] ops = new string[5 + 1];
-            ops[ops.Length - 1] = "¬";
-            for(int i = 0; i < ops.Length-1; i++)
-            {
-                ops[i] = (i+1).ToString();
-            }
-
+            float mDmg;
             string sel;
-
-            int pDmg;
-            int mDmg;
+            string[] ops = new string[] { "A", "B" };
             bool monsterDefeated = false;
             bool playerDefeated = false;
             while(!monsterDefeated && !playerDefeated)
@@ -159,20 +163,14 @@ namespace DungeonExplorer
                     break;
                 }
 
-                Console.WriteLine("\nPlease pick an ability (1-5)...\n");
-                Console.WriteLine("¬ back");
-                sel = Game.ValidateInputSelection("\n-> ", ops);
-                if (sel != "¬")
+                sel = Game.ValidateInputSelection(ops);
+                if (sel == "a")
                 {
-                    ability = CombatManager.abilitySelectionMatrix[sel];
-                    ability.Use();
-                    Game.Wait(2);
-
-                    pDmg = CombatManager.abilityDamageMatrix[ability.Name][Monster.Type];
-
-                    Monster.TakeDamage(pDmg);
-                    UI.UpdateFight(fightArt, Monster, PlayerManager, 1, pDmg, 0, ability);
-                    Console.ReadKey();
+                    PickAbility(fightArt);
+                }
+                else
+                {
+                    PickAction(fightArt);
                 }
 
                 if (Monster.Energy.Value == 0)
@@ -183,15 +181,78 @@ namespace DungeonExplorer
             }
             if(monsterDefeated)
             {
-                Win();
+                float oldResilience = PlayerManager.player.Resilience.Value;
+                float xp = PlayerManager.CalculateXP(Monster);
+                float newResilience = PlayerManager.player.Resilience.Value;
+                Monster.Defeated = true;
+                UI.WinFight(xp, oldResilience, newResilience);
+                Game.Wait(10);
+                UI.WaitForUser();
             }
 
             return playerDefeated;
         }
 
-        public void Win()
+        public void PickAbility(string fightArt)
         {
-            Console.WriteLine("You won the fight!");
+            Ability ability;
+
+            Dictionary<string, string> ops = new Dictionary<string, string>()
+            {
+                {"1", "breathe"},
+                {"2", "distract"},
+                {"3", "ground"},
+                {"4", "express"},
+                {"5", "reassure"},
+            };
+            string sel;
+            float pDmg;
+
+            Console.WriteLine("\nPlease pick an ability (1-5)...\n");
+            Console.WriteLine("¬ back");
+            sel = Game.SelectOption("Please pick an ability (1-5)..", ops);
+            if (sel != "¬")
+            {
+                ability = PlayerManager.player.abilitySelectionMatrix[sel];
+                ability.Use();
+                Game.Wait(5);
+                pDmg = Math.Min(ability.Damage * CombatManager.abilityDamageMatrix[ability.Name][Monster.Type], Monster.Energy.Value);
+                Monster.TakeDamage(pDmg);
+                UI.UpdateFight(fightArt, Monster, PlayerManager, 1, pDmg, 0, ability);
+
+                ability.LevelUp(pDmg);
+                Game.Wait(2);
+            }
+        }
+
+        public void PickAction(string fightArt)
+        {
+            Dictionary<string, string> ops = new Dictionary<string, string>()
+            {
+                {"1", "Comfort toy"},
+            };
+            string sel = Game.SelectOption("Please pick an action", ops);
+            switch (sel)
+            {
+                case "1": 
+                    {
+                        if(PlayerManager.inventory.comfortToy.isEmpty == true)
+                        {
+                            Console.WriteLine("You don't have a toy to hug :(");
+                            Game.Wait(2);
+                        }
+                        break; 
+                    }
+                case "2":
+                    {
+                        if (PlayerManager.inventory.snack.isEmpty == true)
+                        {
+                            Console.WriteLine("You don't have a snack to use!");
+                            Game.Wait(2);
+                        }
+                        break;
+                    }
+            }
         }
     }
 
@@ -202,11 +263,9 @@ namespace DungeonExplorer
 
         }
 
-        public override bool Interact()
+        public override void Interact()
         {
             UI.WriteDialogue(this.dialogue);
-            PlayerManager.PlayerState();
-            return false;
         }
     }
 }

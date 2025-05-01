@@ -6,6 +6,11 @@ using System.Threading.Tasks;
 
 namespace DungeonExplorer
 {
+    public interface IDamageAble
+    {
+        float TakeDamage(float damage);
+    }
+
     public abstract class Creature
     {
         /// <value>
@@ -18,15 +23,9 @@ namespace DungeonExplorer
         /// </value>
         public PlayerManager playerManager;
 
-
-        /// <value>
-        /// Property <c>Energy</c> is a measure of how much more of this the creature can take.
-        /// </value>
-
-        public CreatureAttribute Energy;
         public Creature()
         {
-            Energy = new CreatureAttribute("Energy", 100);
+
         }
     }
 }

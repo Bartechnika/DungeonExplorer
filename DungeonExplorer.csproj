@@ -46,12 +46,14 @@
     <Compile Include="CombatManager.cs" />
     <Compile Include="CreatureAttribute.cs" />
     <Compile Include="Creature.cs" />
+    <Compile Include="GearSlot.cs" />
     <Compile Include="Id.cs" />
     <Compile Include="Interactions.cs" />
     <Compile Include="Location.cs" />
     <Compile Include="Monsters.cs" />
     <Compile Include="Game.cs" />
     <Compile Include="Inventory.cs" />
+    <Compile Include="PlayerAbilities.cs" />
     <Compile Include="PlayerManager.cs" />
     <Compile Include="InventorySlot.cs" />
     <Compile Include="Item.cs" />

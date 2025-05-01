@@ -15,9 +15,17 @@
 						
 
 
-				Game design: Bartechnika Art: Bartechnika and open-license software
-
-
+						Game design: Bartechnika 
+					Art: Bartechnika and open-license software
+					
+					With credit to
+					~ Leah		: code review
+					~ Reuban 	: kind words
+					~ My friend Ted : puts up with my ramblings (he made me do this)
+					~ My mother	: play testing
+					~ DevDav1	: code review
+					~ httpspenguin  : code review
+					~ Canada	: home of Celeste mountain (inspo for breathing ability)
 
 
 Press any key to continue...

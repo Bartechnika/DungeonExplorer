@@ -16,20 +16,21 @@ namespace DungeonExplorer
     /// </para>
     public class location
     {
-        public string Name { get; set; }
-        public string Description { get; set; }
-        public string Dialogue {  get; set; }
+        public string Name { get; private set; }
+        public string Description { get; private set; }
+        public string Dialogue {  get; private set; }
+        public bool Visited { get; set; }
 
         // The exit flag for this location
-        public bool exitLocation { get; set; }
+        public bool exitLocation { get; private set; }
 
         public bool exitRoom { get; set; }
 
-        // The associated set of interactions
-        public List<Interaction> interactions { get; set; }
-
         // The room the location is situated in
         public Room ThisRoom { get; set; }
+
+        // The associated set of interactions
+        public List<Interaction> interactions { get; set; }
 
         public Dictionary<string, bool> adjacentLocations;
 
@@ -39,15 +40,14 @@ namespace DungeonExplorer
         /// <param name="name"></param>
         /// <param name="room"></param>
         /// <exception cref="MissingFieldException"></exception>
-        public location(string name, string description, string dialogue, Room room=null)
+        public location(string name, string description, string dialogue)
         {
             Name = name ?? throw new ArgumentNullException(nameof(name), "The name cannot be null");
-            Dialogue = dialogue;
-            Description = description;
-            //?? throw new ArgumentNullException(nameof(room), "The room cannot be null");
-            ThisRoom = room;
+            Dialogue = dialogue ?? throw new ArgumentNullException(nameof(name), "The dialogue cannot be null");
+            Description = description ?? throw new ArgumentNullException(nameof(name), "The description cannot be null");
+            Visited = false;
+            
             exitLocation = false;
-            adjacentLocations = new Dictionary<string, bool>();
         }
 
         /// <summary>
@@ -63,7 +63,8 @@ namespace DungeonExplorer
             string[] ops = new string[adjacentLocations.Count+2];
             ops[ops.Length - 2] = "EXIT";
             ops[ops.Length - 1] = "¬";
-            Console.WriteLine("\nTravelling to next location...\n");
+            Console.WriteLine("\nTravelling to next location...");
+            Console.WriteLine("Please select 1, 2... \n");
             foreach (var loc in adjacentLocations)
             {
                 ops[count] = (count+1).ToString();
@@ -72,25 +73,34 @@ namespace DungeonExplorer
                 string output = $"({count}) {loc.Key} : {unlocked} ";
                 Console.WriteLine(output);
             }
-            Console.WriteLine("EXIT");
-            Console.Write("¬ back");
+            Console.WriteLine("(exit) EXIT ===>");
+            Console.Write("(¬) back");
 
             string sel;
             bool cont = true;
 
-            sel = Game.ValidateInputSelection("\n-> ", ops);
+            sel = Game.ValidateInputSelection(ops);
             switch (sel)
             {
                 case "exit":
                 {
-                        exitRoom = true;
-                        break;
+                        if(ThisRoom.exitCond == false)
+                        {
+                            Console.WriteLine("Cannot exit room - exit condition not met");
+                            UI.GetLocation(this, ThisRoom.ThisPlayerManager);
+                            break;
+                        }
+                        else
+                        {
+                            exitRoom = true;
+                            break;
+                        }
                 }
 
                 case "¬":
                 {
-                    UI.GetLocation(this);
-                        break;
+                    UI.GetLocation(this, ThisRoom.ThisPlayerManager);
+                    break;
                 }
 
                 default:
@@ -98,7 +108,7 @@ namespace DungeonExplorer
                     if (adjacentLocations[adjacentLocations.Keys.ToArray()[int.Parse(sel) - 1]] == true)
                     {
                         Console.WriteLine("\n/^`o`/^ Walking to next location...\n");
-                        //Game.Wait(2);
+                        Game.Wait(2);
                         exitLocation = true; // raise exit flag to leave location
                         next = ThisRoom.Locations[adjacentLocations.Keys.ToArray()[int.Parse(sel) - 1]];
                     }
@@ -131,7 +141,7 @@ namespace DungeonExplorer
             Console.WriteLine("¬ back");
 
             string sel;
-            sel = Game.ValidateInputSelection("\n-> ", ops);
+            sel = Game.ValidateInputSelection(ops);
             if(sel != "¬")
             {
                 TriggerInteraction(interactions[int.Parse(sel)-1]);
@@ -141,23 +151,20 @@ namespace DungeonExplorer
         public void TriggerInteraction(Interaction interaction)
         {
             interaction.Interact();
+            interaction.Completed = true;
         }
 
         public void GetPlayerActions()
         {
-            string[] ops = new string[3];
-            ops[ops.Length - 1] = "¬";
-
-            Console.WriteLine("\nPlease select a player action (1, 2...)\n");
-            Console.WriteLine("¬ back");
-            for (int i = 0; i < 2; i++)
+            Dictionary<string, string> ops = new Dictionary<string, string>()
             {
-                ops[i] = (i+1).ToString();
-            }
-            string sel;
+                {"1", "View Pockets"},
+                {"¬", "Back"}
+            };
 
             bool cont = true;
-            sel = Game.ValidateInputSelection("\n-> ", ops);
+            string sel;
+            sel = Game.SelectOption("Please select a player action (1, 2...)", ops);
             switch (sel)
             {
                 case "¬":
@@ -182,7 +189,7 @@ namespace DungeonExplorer
 
             while(!exitRoom && !exitLocation)
             {
-                string key = Game.ValidateInputSelection("-> ", new string[] { "A", "B", "C" });
+                string key = Game.ValidateInputSelection(new string[] { "A", "B", "C" });
                 switch (key)
                 {
                     case "a": { loc = GetAdjacentLocations(); break; }
@@ -190,7 +197,7 @@ namespace DungeonExplorer
                     case "c": { GetPlayerActions(); break; }
                 }
                 UI.ClearConsole();
-                UI.GetLocation(this);
+                UI.GetLocation(this, ThisRoom.ThisPlayerManager);
             }
             return loc;
         }

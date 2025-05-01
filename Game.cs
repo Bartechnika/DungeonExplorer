@@ -11,7 +11,7 @@ namespace DungeonExplorer
 {
     public class Game
     {
-        private PlayerManager playerManager;
+        public static PlayerManager playerManager;
         public string workingDir { get; set; }
         public string curDir { get; set; }
         public static string artDir { get; set; }
@@ -21,9 +21,6 @@ namespace DungeonExplorer
         public static string monsterDir { get; set; }
         public static string abilitiesDir { get; set; }
 
-        // Interaction elements
-        public static Dictionary<string, Item> Items;
-        public static Dictionary<string, Monster> Monsters;
         public Game()
         {
             // Initialise directory variables
@@ -39,9 +36,6 @@ namespace DungeonExplorer
 
             // Initialize the game with one room and one player
             playerManager = new PlayerManager();
-
-            Items = XMLManager.GetItemXML(playerManager);
-            //Monsters = XMLManager.GetMonsterXML(playerManager);
         }
 
         /* --- Utility Functions ---
@@ -61,7 +55,7 @@ namespace DungeonExplorer
         /// <returns>
         /// The users validated input.
         /// </returns>
-        public static string ValidateInputSelection(string message, string[] options = null)
+        public static string ValidateInputSelection(string[] options = null)
         {   
             // If the optional parameter "options" is not defined in the function call
             // it defaults to provide the player with a yes/no choice.
@@ -74,7 +68,7 @@ namespace DungeonExplorer
             bool validInput = false;
             while (!validInput)
             {
-                Console.Write(message);
+                Console.Write("-> ");
                 sel = Console.ReadLine().ToLower();
                 if (Array.IndexOf(options, sel) > -1)
                     validInput = true;
@@ -82,6 +76,16 @@ namespace DungeonExplorer
                     Console.WriteLine("User input not in range of selection! Please try again.\n");
             }
             return sel;
+        }
+
+        public static string SelectOption(string message, Dictionary<string, string> ops)
+        {
+            Console.WriteLine($"\n{message}\n");
+            foreach(KeyValuePair<string, string> op in ops)
+            {
+                Console.WriteLine($"({op.Key}) {op.Value}");
+            }
+            return ValidateInputSelection(ops.Keys.ToArray());
         }
 
         public void Start()
@@ -99,7 +103,6 @@ namespace DungeonExplorer
         {
             Console.Write(UI.GetArt("title_screen"));
             Console.ReadKey();
-            GameLoop();
             UI.GetMainMenu();
             InitialiseGame();
         }
@@ -120,7 +123,8 @@ namespace DungeonExplorer
                 {"12:05", 60},
 
             };
-            string time = ValidateInputSelection("what time do you see? (10:10, 10:45, 11:30, 12:00, 12:05) ", times.Keys.ToArray());
+            Console.WriteLine("what time do you see? (10:10, 10:45, 11:30, 12:00, 12:05");
+            string time = ValidateInputSelection(times.Keys.ToArray());
             playerManager.player.Energy.Value = times[time];
 
             Console.WriteLine("\n*New attribute unlocked: energy*\n");
@@ -162,18 +166,17 @@ namespace DungeonExplorer
 
         private void GameLoop()
         {
-            GameMap roomManager = new GameMap(playerManager);
-
+            GameMap.SetValues(playerManager);
             bool playing = true;
             while (playing)
             {
-                roomManager.Update();
+                GameMap.Update();
             }
         }
 
         public static void Wait(int seconds)
         {
-            System.Threading.Thread.Sleep(seconds*1000);
+            System.Threading.Thread.Sleep(seconds*0);
         }
     }
 }

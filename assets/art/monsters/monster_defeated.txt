@@ -1,0 +1,12 @@
+ ____________________________________________
+* 					     *
+| Congratulations! You have won this battle. |
+*____________________________________________*
+
+
+You received {xp}experience for defeating the monster.
+
+ ____________________________________________
+* 					     *
+| Resilience: {old} (old) -> {new} (new) !   |
+*____________________________________________*

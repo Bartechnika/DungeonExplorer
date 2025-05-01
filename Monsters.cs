@@ -10,8 +10,10 @@ namespace DungeonExplorer
     /// <summary>
     /// Abstract class <c>Monster</c> used as a base class for other Monsters.
     /// </summary>
-    public abstract class Monster : Creature
+    public abstract class Monster : Creature, IDamageAble
     {
+        public Id id {  get; private set; }
+        public string Name { get; protected set; }
         /// <value>
         /// Sub-type the monster belongs to.
         /// </value>
@@ -20,77 +22,78 @@ namespace DungeonExplorer
         /// <value>
         /// A phrase associated with each monster sub-type signalling its villainy.
         /// </value>
-        public string Aura {  get; protected set; }
-
-        /// <value>
-        /// Any dialogue spoken around or providing context to the monster.
-        /// </value>
         public string Dialogue {  get; protected set; }
 
         /// <value>
         /// Equivalent to attack damage: drains the players Energy.
         /// </value>
-        public CreatureAttribute Damage { get; protected set; } = new CreatureAttribute("Damage");
+        public Energy Energy { get; protected set; }
+
+        /// <value>
+        /// Equivalent to attack damage: drains the players Energy.
+        /// </value>
+        public MonsterDamage Damage { get; protected set; }
 
         /// <value>
         /// Whether the monster has been defeated.
         /// </value>
-        public bool Defeated {  get; protected set; }
+        public bool Defeated {  get; set; }
 
         /// <value>
         /// Reference to the <c>PlayerManager</c> instance the monster may interacts with.
         /// </value>
-        public PlayerManager PlayerManager;
+        public PlayerManager PlayerManager { get; protected set; }
 
-        public Monster(string name, string dialogue, int damage, PlayerManager playerManager)
+        public Monster(Id id, string name, string dialogue, int energy, int damage, PlayerManager playerManager)
         {
-            this.Name = name ?? throw new ArgumentNullException(nameof(name), "The name cannot be null.");
-            this.Dialogue = dialogue ?? throw new ArgumentNullException(nameof(dialogue), "The dialogue cannot be null.");
-            this.Damage.Value = damage;
+            id = id ?? throw new ArgumentNullException(nameof(name), "The id cannot be null.");
+            Name = name ?? throw new ArgumentNullException(nameof(name), "The name cannot be null.");
+            Dialogue = dialogue ?? throw new ArgumentNullException(nameof(dialogue), "The dialogue cannot be null.");
+            Energy = new Energy(playerManager, energy, energy);
+            Damage = new MonsterDamage(playerManager, damage, damage);
+
             this.PlayerManager = playerManager ?? throw new ArgumentNullException(nameof(dialogue), "The PlayerManager cannot be null.");
             this.Defeated = false;
-            this.Energy.Value = 100;
-
-            Damage.Value = damage;
         }
 
-        public int Attack()
+        public float Attack()
         {   
-            int damage = Damage.Value;
-            damage = PlayerManager.TakeDamage(Damage.Value);
+            float damage = Damage.Value;
+            damage = PlayerManager.player.TakeDamage(Damage.Value);
             return damage;
         }
 
-        public void TakeDamage(int damage)
+        public float TakeDamage(float damage)
         {
             Energy.Value -= damage;
-        }
-    }
-
-    public class SocialMonster : Monster
-    {   
-        public SocialMonster(string name, string dialogue, int overwhelmFactor, PlayerManager playerManager) : base(name, dialogue, overwhelmFactor, playerManager)
-        {
-            Type = "social";
-            Aura = "Countless voices clutter your mind as you find yourself unable to think clearly.";
-        }
-    }
-
-    public class SensoryMonster : Monster
-    {
-        public SensoryMonster(string name, string dialogue, int overwhelmFactor, PlayerManager playerManager) : base(name, dialogue, overwhelmFactor, playerManager)
-        {
-            Type = "sensory";
-            Aura = "Your nerves tingle as your mind clouds over, clouded by its relentless stabbing.";
+            return damage;
         }
     }
 
     public class InternalMonster : Monster
     {
-        public InternalMonster(string name, string dialogue, int overwhelmFactor, PlayerManager playerManager) : base(name, dialogue, overwhelmFactor, playerManager)
+        public InternalMonster(Id id, string name, string dialogue, int energy, int damage, PlayerManager playerManager) : base(id, name, dialogue, energy, damage, playerManager)
         {
             Type = "internal";
-            Aura = "Your vision fades and the surroundings become a blur, you shake yourself from head to toe.";
+            Dialogue = "Your vision fades and the surroundings become a blur, you shake yourself from head to toe.";
+        }
+    }
+
+    public class SensoryMonster : Monster
+    {
+        public SensoryMonster(Id id, string name, string dialogue, int energy, int damage, PlayerManager playerManager) : base(id, name, dialogue, energy, damage, playerManager)
+        {
+            Type = "sensory";
+            Dialogue = "Your nerves tingle as your mind clouds over, clouded by its relentless stabbing.";
+        }
+    }
+
+    public class SocialMonster : Monster
+    {
+        public SocialMonster(Id id, string name, string dialogue, int energy, int damage, PlayerManager playerManager) : base(id, name, dialogue, energy, damage, playerManager)
+        {
+            Type = "social";
+            Dialogue = "Countless voices clutter your mind as you find yourself unable to think clearly.";
         }
     }
 }

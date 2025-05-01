@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<monsters>
+	<monster>
+		<id>#001</id>
+		<type>sensory</type>
+		<name>Evil Jeans!r</name>
+		<dialogue>krinlekrinkle</dialogue>
+		<energy>10</energy>
+		<damage>5</damage>
+	</monster>
+</monsters>

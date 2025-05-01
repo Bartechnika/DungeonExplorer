@@ -1,12 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <items>
-	<item id="#001" name="Student ID Card" type="card" baseBoost="5">
+	<item id="#001" name="Student ID Card" type="miscellaneous" boost="5">
 		Your Hawkin's Community College student ID card: required to enter the building and show proof of ID.
 	</item>
-	<item id="#002" name="Tiny Octopus Plushy" type="comfort-toy" baseBoost="10">
+	<item id="#002" name="Tiny Octopush" type="comfort-toy" boost="10">
 		Favourite of the small plushies.
 	</item>
-	<item id="#003" name="Vape Sticker" type="card" baseBoost="-1">
+	<item id="#003" name="Vape Sticker" type="miscellaneous" boost="-1">
 		Without context the text reading "peel off" would be difficult to decipher.
+	</item>
+	<item id="#004" name="Bobble Hat" type="hat" boost="5">
+		My blue and yellow wooly hat - gift from grandad.
+	</item>
+	<item id="#005" name="Moby Dick" type="book" boost="5">
+		Your copy of Moby Dick; or the Whale. On loan from the local library
 	</item>
 </items>

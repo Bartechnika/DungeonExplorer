@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Linq;
+using System.Security.Policy;
 using System.Xml;
 using System.Xml.Linq;
 using static DungeonExplorer.GameMap;
@@ -45,6 +46,8 @@ namespace DungeonExplorer
         /// </value>
         public location StartLoc {  get; private set; }
 
+        public bool exitCond { get; private set; }
+
         /// <value>
         /// Property <c>exitLoc</c> maps each location to its string-identifier.
         /// </value>
@@ -61,6 +64,7 @@ namespace DungeonExplorer
             Locations = locations;
             StartLoc = locations.Values.ToArray()[0];
             ThisPlayerManager = playerManager ?? throw new ArgumentNullException(nameof(playerManager));
+            exitCond = true;
         }
 
         public void Enter()
@@ -74,7 +78,8 @@ namespace DungeonExplorer
             location nextLoc;
             while (true)
             {
-                UI.GetLocation(CurLoc);
+                CurLoc.Visited = true;
+                UI.GetLocation(CurLoc, ThisPlayerManager);
                 nextLoc = CurLoc.Enter();
                 if (CurLoc.exitRoom == true) { CurLoc.exitRoom = false; break; }
                 CurLoc = nextLoc;
@@ -107,7 +112,9 @@ namespace DungeonExplorer
 
         public void Exit()
         {
+            Console.WriteLine("Leaving the room...");
             UI.WriteDialogue(ExitDialogue);
+            Game.Wait(2);
         }
 
         public override string ToString()

@@ -24,89 +24,6 @@
 	</room>
 	-->
 
-	<bedroom>
-		<name>
-			Your bedroom
-		</name>
-		<description>
-			Your safe place - nothing can hurt you here. Equipped with beautiful hanging lights and posters from your favourite Anime.
-		</description>
-		<entranceDialogue>
-			Time to get sorted for the day.
-		</entranceDialogue>
-		<exitDialogue>
-			all ready for the day.
-		</exitDialogue>
-		<next>bathroom</next>
-
-		<location name="bed" adj="cabinet:true">
-			<description>cosy double bed</description>
-			<dialogue></dialogue>
-			<interaction name="octopus toy" type="found-item">
-				<dialogue>
-					do you want to come along octopus?
-				</dialogue>
-				<item name="" id="#002" amount=""></item>
-				<monster name="" id="#000" of=""></monster>
-			</interaction>
-		</location>
-
-		<location name="cabinet" adj="cloth-draw:true">
-			<description>A broad cabinet with a variety of items scattered atop.</description>
-			<dialogue></dialogue>
-			<interaction name="grab hat" type="found-item">
-				<dialogue>
-					its breezy out today, think im going to need a hat.
-				</dialogue>
-				<item name="" id="#004" amount=""></item>
-				<monster name="" id="#000" of=""></monster>
-			</interaction>
-			<interaction name="Moby Dick" type="found-item">
-				<dialogue>
-					lets see.. chapter... 5?
-				</dialogue>
-				<item name="" id="#005" amount=""></item>
-				<monster name="" id="#000" of=""></monster>
-			</interaction>
-		</location>
-
-		<location name="cloth-draw" adj="hook:true">
-			<description></description>
-			<dialogue></dialogue>
-			<interaction name="looming encounter..." type="fight-monster">
-				<dialogue>
-					you open the bottom draw by mistake
-				</dialogue>
-				<item name="" id="#001" amount="1"></item>
-				<monster name="" id="#001" of=""></monster>
-			</interaction>
-		</location>
-
-		<location name="hook" adj="door:true">
-			<description></description>
-			<dialogue></dialogue>
-			<interaction name="" type="found-item">
-				<dialogue>
-					you remember to pocket your ID card
-				</dialogue>
-				<item name="" id="#001" amount="1"></item>
-				<monster name="" id="#000" of=""></monster>
-			</interaction>
-		</location>
-
-		<location name="door" adj="cloth-draw:true,hook:true">
-			<description>leaving the room.</description>
-			<dialogue></dialogue>
-			<interaction name="" type="dialogue">
-				<dialogue>
-					cya later room :) OH i forgot to turn off my lights...
-				</dialogue>
-				<item name="" id="#000" amount=""></item>
-				<monster name="" id="#000" of=""></monster>
-			</interaction>
-		</location>
-	</bedroom>
-
 	<bathroom>
 		<name>
 			Bathroom
@@ -121,25 +38,25 @@
 		<exitDialogue>
 			You hastily leave the room, tap still running.
 		</exitDialogue>
-		<exitcond type="enemy" id="#001"></exitcond>
-		<next>car</next>
+		<next>bedroom</next>
 
-		<location name="bathroom-mirror" adj="cabinet:true">
+		<location name="bathroom-mirror" adj="sink:true">
 			<description>A clean bathroom mirror</description>
 			<dialogue></dialogue>
-			<interaction name="Good look" type="dialogue">
+			<interaction name="Good look" type="mirror">
 				<dialogue>
 					*you stare at yourself in the shiny mirror under good lighting*
+					Tip: you can only see your stats when looking into a reflective surface.
 				</dialogue>
 				<item name="" id="#000" amount="0"></item>
 				<monster name="" id="#000" of=""></monster>
 			</interaction>
 		</location>
 
-		<location name="cabinet" adj="sink:true,bathroom-door:true">
-			<description>A small cabinet stacked with various toiletries</description>
+		<location name="cabinet" adj="sink:true,bathroom-door:false">
+			<description></description>
 			<dialogue></dialogue>
-			<interaction name="Toothbrush" type="dialogue">
+			<interaction name="" type="dialogue">
 				<dialogue>
 					*you reach out to grab your toothbrush*
 				</dialogue>
@@ -148,19 +65,19 @@
 			</interaction>
 		</location>
 
-		<location name="sink" adj="cabinet:true,bathroom-door:true">
-			<description>A hollow sink with invisible scratches</description>
-			<dialogue>Time to brush my teeth</dialogue>
-			<interaction name="Wash Wash" type="dialogue">
+		<location name="sink" adj="bathroom-door:false">
+			<description></description>
+			<dialogue></dialogue>
+			<interaction name="" type="fight-monster">
 				<dialogue>
-					Make sure to brush both sides...
+					Fighting increases your resilience - you can't flee forever.
 				</dialogue>
 				<item name="" id="#000" amount="0"></item>
-				<monster name="" id="#000" of=""></monster>
+				<monster name="Water Conjuror" id="#001" of=""></monster>
 			</interaction>
 		</location>
 
-		<location name="bathroom-door" adj="cabinet:true">
+		<location name="bathroom-door" adj="sink:true">
 			<description></description>
 			<dialogue></dialogue>
 			<interaction name="" type="dialogue">
@@ -172,6 +89,46 @@
 			</interaction>
 		</location>
 	</bathroom>
+
+	<bedroom>
+		<name>
+			Your bedroom
+		</name>
+		<description>
+			Your safe place - nothing can hurt you here. Equipped with beautiful hanging lights and posters from your favourite Anime.
+		</description>
+		<entranceDialogue>
+			Time to get sorted for the day.
+		</entranceDialogue>
+		<exitDialogue>
+			all ready for the day.
+		</exitDialogue>
+		<next>car</next>
+
+		<location name="hook" adj="door:true">
+			<description></description>
+			<dialogue></dialogue>
+			<interaction name="" type="found-item">
+				<dialogue>
+					you take your rucksack off the hook and remember to pocket your ID card.
+				</dialogue>
+				<item name="" id="#001" amount="1"></item>
+				<monster name="" id="#000" of=""></monster>
+			</interaction>
+		</location>
+
+		<location name="door" adj="hook:true">
+			<description></description>
+			<dialogue></dialogue>
+			<interaction name="" type="dialogue">
+				<dialogue>
+					cya later room :) OH i forgot to turn off my lights...
+				</dialogue>
+				<item name="" id="#000" amount=""></item>
+				<monster name="" id="#000" of=""></monster>
+			</interaction>
+		</location>
+	</bedroom>
 
 	<car>
 		<name>
@@ -196,6 +153,18 @@
 					*road works again?*
 				</dialogue>
 				<item name="" id="#000" amount=""></item>
+				<monster name="" id="#000" of=""></monster>
+			</interaction>
+		</location>
+
+		<location name="turn-around" adj="seat:true">
+			<description></description>
+			<dialogue></dialogue>
+			<interaction name="" type="found-item">
+				<dialogue>
+					you look behind you to see Octopus sitting lonely on the backseat
+				</dialogue>
+				<item name="" id="#002" amount="1"></item>
 				<monster name="" id="#000" of=""></monster>
 			</interaction>
 		</location>
@@ -232,7 +201,7 @@
 				<dialogue>
 					you look at the bus stop pole and see a sticker
 				</dialogue>
-				<item name="" id="#002" amount=""></item>
+				<item name="" id="#000" amount="0"></item>
 				<monster name="" id="#000" of=""></monster>
 			</interaction>
 		</location>

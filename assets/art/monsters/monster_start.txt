@@ -1,0 +1,6 @@
+> You are about to enter into a fight against a monster.
+  To help, you may bring with you 3 items from your inventory to have at hand
+
+/* think -carefully- about what to take */
+
+The content of your pockets is:

@@ -18,12 +18,18 @@ namespace DungeonExplorer
 
         const string locName = "{location-name~~~~~~~~~~~}";
         const string locDesc = "{description~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~}";
-        const string locDialogue = "{intro~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~}";
+        const string locDialogue = "{dialogue~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~}";
         const string locNav = "~~~~~~~~~~}";
-        const string locInt = "{int1~~~~~~~~~~}";
+        const string locInt = "~~~~~~~~~~~}";
 
-        const string playerResilience = "{resilience}";
         const string playerEnergy = "{energy}";
+        const string playerResilience = "{resilience}";
+        const string playerLove = "{love}";
+        const string playerImagination = "{imagination}";
+        const string playerToy = "{comfort-toy~~~~~~~~}";
+        const string playerBook = "{book~~~~~~~~~~~~~~~}";
+        const string playerHat = "{hat~~~~~~~~~~~~~~~~}";
+        const string playerSnack = "{snack~~~~~~~~~~~~~~}";
 
         const string itemName = "{itemZ~~~~~~~~~}";
         const string itemQuantity = "{Zq}";
@@ -34,6 +40,10 @@ namespace DungeonExplorer
         const string monsterDmg = "{dmg~~~~~~~~}";
         const string monsterEnergy = "{energy~~}";
         const string monsterArtField = "{X~~~~~~~~~~~~~~~~~~~~~~~~~~~~~}";
+
+        const string monsterWinXP = "{xp}";
+        const string monsterWinResilienceOld = "{old}";
+        const string monsterWinResilienceNew = "{new}";
 
         const string fightPlayerDamage = "{player-dmg~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~}";
         const string fightMonsterDamage = "{monster-dmg~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~}";
@@ -220,7 +230,7 @@ namespace DungeonExplorer
             Console.WriteLine(roomArt);
         }
 
-        public static void GetLocation(location loc)
+        public static void GetLocation(location loc, PlayerManager playerManager)
         {
             ClearConsole();
             string locArt = GetArt("location", Game.locDir);
@@ -228,22 +238,79 @@ namespace DungeonExplorer
             locArt = PopulateField(locArt, locDesc, loc.Description);
             locArt = PopulateField(locArt, locDialogue, loc.Dialogue);
 
-            for (int i = 0; i < loc.adjacentLocations.Keys.ToArray().Length; i++)
+
+            string field;
+            string checkField;
+            string name;
+            string visited;
+            for (int i = 0; i < 4; i++)
             {
-                locArt = PopulateField(locArt, "{nav" + (i+1).ToString() + locNav, loc.adjacentLocations.Keys.ToArray()[i]);
+                field = "{nav" + (i + 1).ToString() + locNav;
+                checkField = "{n" + (i + 1).ToString() + "}";
+                name = "";
+                visited = "";
+                if (i < loc.adjacentLocations.Keys.ToArray().Length)
+                {
+                    visited = "N";
+                    name = loc.adjacentLocations.Keys.ToArray()[i];
+                    if(loc.Visited)
+                    {
+                        visited = "Y";
+                    }
+                }
+                locArt = PopulateField(locArt, field, name);
+                locArt = PopulateField(locArt, checkField, visited);
             }
+
+            for (int i = 0; i < 4; i++)
+            {
+                field = "{int" + (i + 1).ToString() + locInt;
+                checkField = "{i" + (i + 1).ToString() + "}";
+                name = "";
+                visited = "";
+                if (i < loc.interactions.Count)
+                {
+                    visited = "N";
+                    name = loc.interactions[i].Name;
+                    if (loc.Visited)
+                    {
+                        visited = "Y";
+                    }
+                }
+                locArt = PopulateField(locArt, field, name);
+                locArt = PopulateField(locArt, checkField, visited);
+            }
+
+            locArt = UpdatePlayer(locArt, playerManager);
 
             GetRoom(loc.ThisRoom);
             Console.WriteLine(locArt);
 
         }
 
-        public static string GetFight(Monster monster)
+        public static string UpdatePlayer(string art, PlayerManager playerManager)
+        {
+            Player player = playerManager.player;
+            art = PopulateField(art, playerEnergy, Math.Round(player.Energy.Value, 1).ToString());
+            art = PopulateField(art, playerResilience, Math.Round(player.Resilience.Value, 1).ToString());
+            art = PopulateField(art, playerLove, Math.Round(player.Love.Value, 1).ToString());
+            art = PopulateField(art, playerImagination, Math.Round(player.Imagination.Value, 1).ToString());
+
+            art = PopulateField(art, playerToy, playerManager.inventory.comfortToy.Name);
+            art = PopulateField(art, playerBook, playerManager.inventory.book.Name);
+            art = PopulateField(art, playerHat, playerManager.inventory.hat.Name);
+            art = PopulateField(art, playerSnack, playerManager.inventory.snack.Name);
+
+            return art;
+
+        }
+
+        public static string GetFight(Monster monster, PlayerManager playerManager)
         {
             ClearConsole();
             string fightArt = GetArt("monster", Game.monsterDir);
             string[] monsterArt = GetArt(monster.Type, Game.monsterDir).Split('\n');
-            fightArt = PopulateField(fightArt, monsterAura, monster.Aura);
+            fightArt = PopulateField(fightArt, monsterAura, monster.Dialogue);
             fightArt = PopulateField(fightArt, monsterName, monster.Name);
             fightArt = PopulateField(fightArt, monsterType, monster.Type);
             fightArt = PopulateField(fightArt, monsterDmg, monster.Damage.Value.ToString());
@@ -254,25 +321,27 @@ namespace DungeonExplorer
                 fightArt = PopulateField(fightArt, field.Replace("X", (i + 1).ToString()), monsterArt[i]);
             }
 
+            fightArt = UpdatePlayer(fightArt, playerManager);
+
             Console.WriteLine(fightArt);
             return fightArt;
 
         }
 
-        public static void UpdateFight(string fightArt, Monster monster, PlayerManager playerManager, int turn = 0,  int pDmg=0, int mDmg=0, Ability ability=null)
+        public static void UpdateFight(string fightArt, Monster monster, PlayerManager playerManager, int turn = 0, float pDmg=0, float mDmg =0, Ability ability=null)
         {
             ClearConsole();
-            fightArt = PopulateField(fightArt, monsterEnergy, monster.Energy.Value.ToString());
+            fightArt = PopulateField(fightArt, monsterEnergy, Math.Round(monster.Energy.Value, 1).ToString());
 
             string playerDamage = "";
             string monsterDamage = "";
             if(turn==1) // player turn
             {
-                playerDamage = $"The player dealt {pDmg} -> {monster.Energy.Value}% damage using {ability.Name}!";
+                playerDamage = $"The player dealt {Math.Round(pDmg, 1)} -> {Math.Round(monster.Energy.Value, 1)}% damage using {ability.Name}!";
             }
             if(turn==2) // monster turn
             {
-                monsterDamage = $"The monster dealt {mDmg} -> {playerManager.player.Energy.Value} damage!";
+                monsterDamage = $"The monster dealt {Math.Round(mDmg, 1)} -> {Math.Round(playerManager.player.Energy.Value, 1)} damage!";
             }
 
             fightArt = PopulateField(fightArt, fightPlayerDamage, playerDamage);
@@ -281,12 +350,22 @@ namespace DungeonExplorer
             Console.WriteLine(fightArt);
         }
 
+        public static void WinFight(float xp, float oldResilience, float newResilience)
+        {
+            string winArt = UI.GetArt("monster_defeated", Game.monsterDir);
+            winArt = PopulateField(winArt, monsterWinXP, xp.ToString());
+            winArt = PopulateField(winArt, monsterWinResilienceOld, oldResilience.ToString());
+            winArt = PopulateField(winArt, monsterWinResilienceNew, newResilience.ToString());
+
+            Console.WriteLine(winArt);
+        }
+
         public static void GetPockets(InventorySlot[] items)
         {
             string pockets = GetArt("pockets");
             string nextField = "";
             string nextQuantity = "";
-            for (int i  = 0; i < items.Length; i++)
+            for (int i  = 0; i < Inventory.maxPocketSlots; i++)
             {
                 nextField = itemName.Replace('Z', (char)(i + 65)); // A : 65 ASCII
                 nextQuantity= itemQuantity.Replace('Z', (char)(i + 65));
@@ -302,6 +381,12 @@ namespace DungeonExplorer
                 }
             }
             Console.WriteLine(pockets);
+        }
+
+        public static void WaitForUser()
+        {
+            Console.WriteLine("Press any key to contine...");
+            Console.ReadKey();
         }
 
         public static void ClearConsole()

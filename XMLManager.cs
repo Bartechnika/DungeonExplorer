@@ -116,13 +116,9 @@ namespace DungeonExplorer
 
                 // For monster
                 XElement interactMonster = interactionX.Element("monster");
-                string monsterName = interactMonster.Attribute("name").Value.ToString();
-                string of = interactMonster.Attribute("of").Value.ToString();
-                int monsterOf = 0;
-                if (of != "") { monsterOf = int.Parse(of); }
                 Id monsterId = new Id(interactMonster.Attribute("id").Value.ToString());
 
-                interaction = GameMap.GetInteraction(interactName, interactType, interactDialogue, playerManager, itemId, itemAmount, monsterId, monsterName, monsterOf);
+                interaction = GameMap.GetInteraction(interactName, interactType, interactDialogue, playerManager, itemId, itemAmount, monsterId);
                 interactions.Add(interaction);
             }
 
@@ -176,10 +172,11 @@ namespace DungeonExplorer
                 {
                     string name = itemX.Attribute("name").Value;
                     string type = itemX.Attribute("type").Value;
+                    string boost = itemX.Attribute("boost").Value;
                     string description = itemX.Value.ToString();
                     Id id = new Id(itemX.Attribute("id").Value);
 
-                    Item item = new Card(id, name, description);
+                    Item item = GameMap.GetItem(id, type, name, description, boost);
                     Items.Add(id.Val, item);
                 }
             }
@@ -187,26 +184,27 @@ namespace DungeonExplorer
             return Items;
         }
 
-        public static Dictionary<Id, Monster> GetMonsterXML(PlayerManager playerManager)
+        public static Dictionary<string, Monster> GetMonsterXML(PlayerManager playerManager)
         {
-            Dictionary<Id, Monster> Monsters = new Dictionary<Id, Monster>();
-
-            Dictionary<Id, Item> Items = new Dictionary<Id, Item>();
-            string path = Game.textDir + "creatures.xml";
+            Dictionary<string, Monster> Monsters = new Dictionary<string, Monster>();
+            string path = Game.textDir + "monsters.xml";
 
             if (File.Exists(path))
             {
                 XElement monstersXElement = XElement.Load(path);
                 List<XElement> monsterXElements = monstersXElement.Elements().ToList();
+                Monster monster;
                 foreach (XElement monsterX in monsterXElements)
                 {
-                    string name = monsterX.Attribute("name").Value;
-                    string type = monsterX.Attribute("type").Value;
-                    string description = monsterX.Value.ToString();
-                    Id id = new Id(monsterX.Attribute("id").Value);
+                    Id id = new Id(monsterX.Element("id").Value);
+                    string type = monsterX.Element("type").Value;
+                    string name = monsterX.Element("name").Value;
+                    string dialogue = monsterX.Element("dialogue").Value;
+                    string energy = monsterX.Element("energy").Value;
+                    string damage = monsterX.Element("damage").Value;
+                    monster = GameMap.GetMonster(id, type, name, dialogue, energy, damage);
 
-                    Item item = new Card(id, name, description);
-                    Items.Add(id, item);
+                    Monsters.Add(id.Val, monster);
                 }
             }
 

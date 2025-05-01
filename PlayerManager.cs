@@ -5,9 +5,11 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Management.Instrumentation;
+using System.Net.Sockets;
 using System.Runtime.InteropServices;
 using System.Security.Policy;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 
@@ -15,20 +17,57 @@ namespace DungeonExplorer
 {
     public class PlayerManager
     {   
-
-        public Dictionary<string, Item> items = new Dictionary<string, Item>();
         public Player player;
-        readonly Inventory inventory;
+        public readonly Inventory inventory;
 
         public PlayerManager()
         {
             player = new Player();
             inventory = new Inventory();
         }
+        /*
+        public void ChooseItems()
+        {
+            UI.GetPockets(inventory.Pockets);
+
+            string[] ops = new string[Inventory.maxPocketSlots];
+
+            for (int i = 0; i < Inventory.maxPocketSlots; i++)
+            {
+                ops[i] = ((char)(i + 65)).ToString();
+            }
+            char sel1;
+            char sel2;
+
+            bool cont = true;
+            Item nextItem = null;
+            for (int i = 0; i < Inventory.maxHotbarSlots; i++)
+            {
+                while (cont)
+                {
+                    Console.WriteLine("\nSelect the next item to view in detail (A, B...)\n");
+                    sel1 = Game.ValidateInputSelection("\n-> ", ops)[0];
+                    nextItem = (inventory.Pockets[(int)(sel1) - 97].ItemStack.Item);
+                    inventory.InspectItem(nextItem);
+
+                    Console.WriteLine("Type Y to confirm your choice, or N to go back");
+                    sel2 = Game.ValidateInputSelection("\n-> ")[0];
+
+                    if (sel2 == 'y') { break; }
+
+                    UI.ClearConsole();
+                    UI.GetLocation(GameMap.CurRoom.CurLoc);
+                    UI.GetPockets(inventory.Pockets);
+                }
+
+                Console.WriteLine($"\nYou have selected {nextItem.Name} as your {i} item.");
+                inventory.StoreHotbar(nextItem);
+            }
+        }*/
 
         public void PickupItem(string store, Item item, int amount)
         {
-            inventory.StoreItem(store, item, amount);
+            inventory.StorePocket(item, amount);
         }
 
         public Item GetItem(string id)
@@ -37,27 +76,36 @@ namespace DungeonExplorer
             Item thisItem;
             try
             {
-                thisItem = items[id];
+                thisItem = GameMap.Items[id];
             }
             catch
             {
                 throw new KeyNotFoundException($"No item was found with id: {id}.");
             }
 
-            return items[id];
+            return GameMap.Items[id];
         }
 
-        public int TakeDamage(int overwhelmFactor)
+        public void UseToy()
         {
-            int damage = overwhelmFactor * (1 - player.Resilience.Value); // formula for damage
-            player.Energy.Value -= damage;
-            //Console.WriteLine($"\nYour energy was reduced to {player.Energy.Value} by {overwhelmFactor} points.\n");
-            if (player.Energy.Value == 0)
+            
+            if (DateTime.Now.Subtract(inventory.comfortToy.item.lastUsed).TotalSeconds < 60)
             {
-                player.overwhelmed = true;
+                Console.WriteLine("Your toy is looking a little worn...");
             }
+            else
+            {
+                inventory.comfortToy.Use();
+                player.Love.Level(inventory.comfortToy.item.Boost);
+            }
+            Game.Wait(2);
+        }
 
-            return damage;
+
+        public void EatSnack()
+        {
+            inventory.snack.Use();
+            player.Heal(inventory.snack.Boost);
         }
 
         public void CheckPockets()
@@ -65,23 +113,20 @@ namespace DungeonExplorer
             inventory.CheckPockets();
         }
 
-        public void CheckRucksack()
+        public void AssignGear()
         {
-            inventory.CheckRucksack();
+            inventory.AssignGear();
         }
 
-        /// <summary>
-        /// Output a visual representation of the player's state.
-        /// </summary>
-        public void PlayerState()
+        public float CalculateXP(Monster monster)
         {
-            /*
-            string player_art = UI.GetArt("player");
-            string s = player_art.Replace("{resilience}", player.Resilience.Value.ToString());
-            s = s.Replace("{imagination}", player.Imagination.Value.ToString());
-            s = s.Replace("{energy}", player.Energy.Value.ToString());
-            Console.WriteLine(s);
-            */
+            return monster.Energy.MaxValue + monster.Damage.Value; // max value of 200
+        }
+
+        public void UpdateStats()
+        {
+            player.Resilience.Value = player.Resilience.BaseValue + inventory.comfortToy.Boost;
+            player.Imagination.Value = player.Imagination.BaseValue + inventory.book.Boost;
         }
     }
 }

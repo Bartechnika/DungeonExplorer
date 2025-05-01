@@ -10,8 +10,9 @@ using static DungeonExplorer.GameMap;
 
 namespace DungeonExplorer
 {
-    public class Player : Creature
+    public class Player : Creature, IDamageAble
     {
+
         /// <summary>
         /// Struct <c>pronouns</c> allows the user to set any number of subject, object and possessive pronouns.
         /// </summary>
@@ -70,27 +71,46 @@ namespace DungeonExplorer
 
         public pronouns myPronouns;
 
+        public bool overwhelmed = false;
+
+        public Breathe breathe = new Breathe();
+        public Distract distract = new Distract();
+        public Reassure reassure = new Reassure();
+        public Express express = new Express();
+        public Ground ground = new Ground();
+
+        public Dictionary<string, Ability> abilitySelectionMatrix { get; private set; }
+
+
+        /// <value>
+        /// Property <c>Energy</c> is a measure of the player's ability to persevere in the face of difficulty. 
+        /// </value>
+        public Energy Energy;
+
         /// <value>
         /// Property <c>Resilience</c> is a measure of the player's ability to persevere in the face of difficulty. 
         /// </value>
-        public CreatureAttribute Resilience;
+        public Resilience Resilience;
 
-        /// <value>
-        /// Property <c>Imagination</c> is a measure of the player's ability to think outside the box.
-        /// </value>
-        public CreatureAttribute Imagination;
+        public Love Love;
 
-        /// <value>
-        /// Property <c>Energy</c> is a measure of how much more of this the player can take.
-        /// </value>
-        /// 
-
-        public bool overwhelmed = false;
+        public Imagination Imagination;
 
         public Player()
         {
-            Resilience = new CreatureAttribute("Resilience", 0);
-            Imagination = new CreatureAttribute("Imagination", 0);
+            Energy = new Energy(playerManager, 100, 50);
+            Resilience = new Resilience(playerManager, 100, 1);
+            Love = new Love(playerManager, 100, 1);
+            Imagination = new Imagination(playerManager, 100, 1);
+
+            abilitySelectionMatrix = new Dictionary<string, Ability>()
+            {
+                {"1", breathe},
+                {"2", distract},
+                {"3", reassure},
+                {"4", express},
+                {"5", ground}
+            };
         }
 
         /// <summary>
@@ -133,12 +153,13 @@ namespace DungeonExplorer
 
             string next;
 
-            Console.WriteLine("\nwith pronouns: ");
+            Console.WriteLine("\nWith the following pronouns: (please select your pronouns)");
             while (addSubject || addObject || addPossessive)
             {
                 if (addSubject)
                 {
-                    next = Game.ValidateInputSelection("Would you like to add another subject pronoun? Enter (Y/N) ");
+                    Console.WriteLine("Would you like to add another subject pronoun? Enter (Y/N)");
+                    next = Game.ValidateInputSelection();
                     if (next == "n")
                         addSubject = false;
                     else
@@ -150,7 +171,8 @@ namespace DungeonExplorer
 
                 if (addObject)
                 {
-                    next = Game.ValidateInputSelection("Would you like to add another object pronoun? Enter (Y/N) ");
+                    Console.WriteLine("Would you like to add another object pronoun? Enter (Y/N)");
+                    next = Game.ValidateInputSelection();
                     if (next == "n")
                     {
                         addObject = false;
@@ -164,7 +186,8 @@ namespace DungeonExplorer
 
                 if (addPossessive)
                 {
-                    next = Game.ValidateInputSelection("Would you like to add another possessive pronoun? Enter (Y/N) ");
+                    Console.WriteLine("Would you like to add another possessive pronoun? Enter (Y/N)");
+                    next = Game.ValidateInputSelection();
                     if (next == "n")
                     {
                         addPossessive = false;
@@ -178,6 +201,28 @@ namespace DungeonExplorer
             }
 
             myPronouns = new pronouns(Subjects.ToArray(), Objects.ToArray(), Possessives.ToArray());
+        }
+
+        public float Heal(float heal)
+        {
+            float prevEnergy = Energy.Value;
+            Energy.Value += heal;
+            return (float)Math.Max(heal, Energy.MaxValue-prevEnergy);
+        }
+
+        public float TakeDamage(float damage)
+        {
+            float x1 = 100 - Resilience.Value;
+            float x2 = x1 / 100f;
+            float scaledDamage = (int)(damage * (x2)); // formula for damage
+            Energy.Value -= scaledDamage;
+            //Console.WriteLine($"\nYour energy was reduced to {player.Energy.Value} by {overwhelmFactor} points.\n");
+            if (Energy.Value == 0)
+            {
+                overwhelmed = true;
+            }
+
+            return scaledDamage;
         }
 
         /// <summary>
